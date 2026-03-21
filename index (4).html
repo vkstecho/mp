@@ -1,0 +1,2357 @@
+<!DOCTYPE html>
+<html lang="en" translate="no">
+<head>
+<meta charset="UTF-8">
+<meta name="google" content="notranslate">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#ffffff">
+<title>Man Power — Shift Management</title>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="description" content="Man Power — Universal Shift Management System · mp.vkstech.com">
+<link rel="canonical" href="https://mp.vkstech.com">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@700;800&family=Barlow+Condensed:wght@700;800;900&display=swap" rel="stylesheet">
+
+<!-- Firebase -->
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import{getDatabase,ref,set,get,onValue,push,update,remove}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import{getAuth,signInAnonymously,signOut,signInWithPhoneNumber,RecaptchaVerifier}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+const C={apiKey:"AIzaSyAyO1Haw1VwscF4DexHAOdvzDEXs1xWMG4",authDomain:"manpower26.firebaseapp.com",databaseURL:"https://manpower26-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"manpower26",storageBucket:"manpower26.firebasestorage.app",messagingSenderId:"168996239731",appId:"1:168996239731:web:5b627f67bd1e59bb22ad06"};
+try{
+  const app=initializeApp(C);
+  const db=getDatabase(app);
+  const auth=getAuth(app);
+  window._fb=async(op,path,val)=>{
+    if(!auth.currentUser)try{await signInAnonymously(auth)}catch(e){}
+    const r=ref(db,path);
+    switch(op){
+      case'get':return get(r);
+      case'set':return set(r,val);
+      case'push':return push(r,val);
+      case'update':return update(r,val);
+      case'remove':return remove(r);
+      case'listen':return onValue(r,val);
+    }
+  };
+  window._auth=auth;
+  window._signOut=()=>signOut(auth);
+  window._sendOTP=async phone=>{
+    try{
+      if(!window._recaptcha)window._recaptcha=new RecaptchaVerifier(auth,'rcBox',{size:'invisible'});
+      const result=await signInWithPhoneNumber(auth,phone,window._recaptcha);
+      window._confirmOTP=code=>result.confirm(code);
+      return{ok:true}
+    }catch(e){window._recaptcha=null;return{ok:false,error:e.message}}
+  };
+  window._firebaseReady=true;
+}catch(e){console.error('Firebase init error:',e)}
+const boot=()=>{try{document.dispatchEvent(new Event('firebase-ready'))}catch(e){}};
+document.readyState==='loading'?document.addEventListener('DOMContentLoaded',boot):setTimeout(boot,50);
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<style>
+/* ═══════════════════════════════════════════════════════
+   MAN POWER v4.0 — IMPROVED SHIFT MANAGEMENT SYSTEM
+   ═══════════════════════════════════════════════════════ */
+:root{
+  --bg:#f4f5f9;--bg2:#ebedf2;--pnl:#fff;--crd:#fff;--crd2:#f7f8fb;
+  --brd:#e0e3ea;--brd2:#cdd1da;
+  --acc:#c2410c;--acc2:#9a3412;--accLt:#fff7ed;--accBg:rgba(194,65,12,.07);
+  --blu:#2563eb;--bluBg:rgba(37,99,235,.06);
+  --grn:#15803d;--grnBg:rgba(21,128,61,.06);
+  --red:#dc2626;--redBg:rgba(220,38,38,.06);
+  --prp:#7c3aed;--prpBg:rgba(124,58,237,.06);
+  --txt:#1e293b;--tx2:#334155;--mt:#64748b;--mt2:#94a3b8;
+  --R:14px;--Rs:10px;
+  --F:'Nunito',system-ui,sans-serif;--Fd:'JetBrains Mono','Nunito',monospace;
+  --shadow:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+  --shadow2:0 4px 12px rgba(0,0,0,.08);
+}
+body.dark{
+  --bg:#0b1120;--bg2:#0f1729;--pnl:#162032;--crd:#1a2740;--crd2:#1e2f4a;
+  --brd:rgba(255,255,255,.07);--brd2:rgba(255,255,255,.12);
+  --acc:#f59e0b;--acc2:#d97706;--accLt:rgba(245,158,11,.1);--accBg:rgba(245,158,11,.08);
+  --blu:#60a5fa;--bluBg:rgba(96,165,250,.1);
+  --grn:#4ade80;--grnBg:rgba(74,222,128,.08);
+  --red:#f87171;--redBg:rgba(248,113,113,.08);
+  --prp:#c084fc;--prpBg:rgba(192,132,252,.08);
+  --txt:#e2e8f0;--tx2:#cbd5e1;--mt:#64748b;--mt2:#475569;
+  --shadow:0 1px 3px rgba(0,0,0,.3);--shadow2:0 4px 12px rgba(0,0,0,.4);
+}
+body.dark .hdr{background:var(--bg2);box-shadow:0 2px 12px rgba(0,0,0,.4)}
+body.dark .nav{background:var(--bg2)}
+body.dark .login-screen{background:linear-gradient(155deg,#060918,#0e1528,#120a22)}
+body.dark .lc{background:rgba(22,32,50,.92);border-color:rgba(255,255,255,.08)}
+body.dark .l-inp{background:rgba(30,47,74,.7);border-color:rgba(255,255,255,.12);color:#fff}
+body.dark .l-inp::placeholder{color:rgba(255,255,255,.3)}
+body.dark .otp-inp{background:rgba(30,47,74,.5);border-color:rgba(255,255,255,.12);color:#fff}
+body.dark #fpScr{background:linear-gradient(155deg,#060918,#0e1528,#120a22)}
+body.dark .toast{background:var(--crd2);color:var(--txt);border-color:var(--brd2)}
+
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:var(--F);background:var(--bg);color:var(--txt);max-width:520px;margin:0 auto;min-height:100vh;overflow-x:hidden;padding-bottom:86px;-webkit-user-select:none;user-select:none}
+@media(min-width:769px){body{max-width:820px}.nav{max-width:820px}.modal-box{max-width:620px}.stat-v{font-size:32px}.pg-t{font-size:24px}.crd{padding:16px}}
+input,textarea{-webkit-user-select:text!important;user-select:text!important}
+@supports(padding:env(safe-area-inset-bottom)){body{padding-bottom:calc(86px+env(safe-area-inset-bottom))}.nav{padding-bottom:env(safe-area-inset-bottom)}}
+
+/* ═══ LOADER ═══ */
+#loader{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}
+.mp-logo{filter:drop-shadow(0 0 12px rgba(249,115,22,.2))}
+.pwa-btn{display:flex;align-items:center;gap:8px;padding:12px 18px;border-radius:12px;border:1.5px solid rgba(194,65,12,.25);background:var(--accBg);color:var(--acc);font-size:13px;font-weight:800;cursor:pointer;font-family:var(--F);margin-top:14px;width:100%;justify-content:center;transition:.15s}
+.pwa-btn:active{transform:scale(.97);background:rgba(194,65,12,.12)}
+.ld-sub{font-size:10px;color:var(--mt);letter-spacing:3px;text-transform:uppercase;font-weight:700}
+.ld-bar{width:130px;height:3px;background:var(--brd);border-radius:2px;overflow:hidden}
+.ld-fill{height:100%;background:linear-gradient(90deg,var(--acc),var(--blu));border-radius:2px;animation:ldF 1.6s ease forwards}
+@keyframes ldF{from{width:0}to{width:100%}}
+
+/* ═══ HEADER ═══ */
+.hdr{background:var(--pnl);border-bottom:1px solid var(--brd);position:sticky;top:0;z-index:100;box-shadow:var(--shadow)}
+.hdr-top{display:flex;align-items:center;justify-content:space-between;padding:10px 14px 7px}
+.hdr-brand{font-family:var(--Fd);font-size:20px;font-weight:800;color:var(--acc)}
+.hdr-brand span{color:var(--tx2)}
+.hdr-r{display:flex;align-items:center;gap:6px}
+.hdr-btn{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:var(--crd2);border:1px solid var(--brd);cursor:pointer;font-size:15px;color:var(--tx2);transition:.15s}
+.hdr-btn:active{background:var(--brd)}
+.u-chip{display:flex;align-items:center;gap:6px;background:var(--crd2);border:1px solid var(--brd);border-radius:10px;padding:4px 10px 4px 4px;cursor:pointer;transition:.15s}
+.u-chip:active{background:var(--brd)}
+.u-av{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--Fd);font-weight:800;font-size:13px;color:#fff;background:linear-gradient(135deg,#ea580c,#2563eb)}
+.u-name{font-size:13px;font-weight:800;color:var(--txt)}
+.role-t{font-size:8px;font-weight:800;padding:2px 6px;border-radius:4px;text-transform:uppercase;letter-spacing:.5px}
+.role-t.sa{background:var(--redBg);color:var(--red)}.role-t.mgr{background:var(--accBg);color:var(--acc)}.role-t.wkr{background:var(--grnBg);color:var(--grn)}.role-t.teamlead{background:var(--bluBg);color:var(--blu)}
+.sync-r{display:flex;align-items:center;gap:5px;padding:3px 14px;background:var(--grnBg);border-bottom:1px solid rgba(21,128,61,.08);font-size:10px;color:var(--grn);font-weight:700}
+
+/* ═══ NAV ═══ */
+.nav{display:flex;justify-content:space-around;padding:4px 6px 6px;background:var(--pnl);border-top:1px solid var(--brd);position:fixed;bottom:0;left:0;right:0;max-width:520px;margin:0 auto;z-index:100;box-shadow:0 -1px 4px rgba(0,0,0,.04)}
+.nb{display:flex;flex-direction:column;align-items:center;gap:1px;background:none;border:none;color:var(--mt);cursor:pointer;font-family:var(--F);font-size:9px;font-weight:700;padding:3px 5px;min-width:46px;position:relative;transition:.15s}
+.nb-i{font-size:18px}.nb.on{color:var(--acc)}
+.nb.on::after{content:'';position:absolute;bottom:0;width:18px;height:2.5px;background:var(--acc);border-radius:2px}
+.nb-b{position:absolute;top:-2px;right:2px;min-width:15px;height:15px;background:var(--red);border-radius:8px;font-size:8px;font-weight:800;color:#fff;display:flex;align-items:center;justify-content:center;padding:0 3px}
+
+/* ═══ PAGES ═══ */
+.main{display:none;padding:14px 14px 18px}
+.tab{display:none}.tab.on{display:block}
+.pg-t{font-size:20px;font-weight:900;color:var(--txt);margin-bottom:3px}
+.pg-s{font-size:11px;color:var(--mt);margin-bottom:14px;font-weight:600}
+
+/* ═══ CARDS & STATS ═══ */
+.stat-c{background:var(--pnl);border:1px solid var(--brd);border-radius:var(--R);padding:13px;text-align:center;box-shadow:var(--shadow)}
+.stat-v{font-family:var(--Fd);font-size:28px;font-weight:800}
+.stat-l{font-size:9px;color:var(--mt);font-weight:700;text-transform:uppercase;letter-spacing:.3px;margin-top:2px}
+.crd{background:var(--pnl);border:1px solid var(--brd);border-radius:var(--R);padding:13px;margin-bottom:8px;box-shadow:var(--shadow);transition:border-color .15s}
+.crd:active{border-color:var(--acc)}
+.crd-n{font-size:14px;font-weight:800;color:var(--txt);margin-bottom:2px}
+.crd-s{font-size:11px;color:var(--mt);font-weight:600}
+
+/* ═══ CHIPS ═══ */
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:10px;scrollbar-width:none}.chips::-webkit-scrollbar{display:none}
+.chip{flex-shrink:0;padding:7px 14px;border-radius:20px;font-size:11px;font-weight:700;background:var(--crd2);border:1px solid var(--brd);cursor:pointer;white-space:nowrap;color:var(--tx2);transition:.15s}
+.chip.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+
+/* ═══ BUTTONS ═══ */
+.btn-p{width:100%;padding:14px;border-radius:var(--R);border:none;background:linear-gradient(135deg,#ea580c,#c2410c);color:#fff;font-family:var(--F);font-size:15px;font-weight:800;cursor:pointer;box-shadow:0 4px 14px rgba(194,65,12,.2);transition:transform .1s}
+.btn-p:active{transform:scale(.97)}
+.btn-p:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.btn-s{padding:10px 14px;border-radius:var(--Rs);border:1.5px solid var(--brd);background:var(--pnl);color:var(--tx2);font-size:12px;font-weight:700;cursor:pointer;font-family:var(--F)}
+.btn-a{padding:9px 14px;border-radius:var(--Rs);border:none;background:linear-gradient(135deg,#ea580c,#c2410c);color:#fff;font-size:12px;font-weight:800;cursor:pointer;font-family:var(--F);box-shadow:0 2px 8px rgba(194,65,12,.15)}
+.act-r{display:flex;gap:7px;margin-bottom:13px;flex-wrap:wrap}
+
+/* ═══ FORMS ═══ */
+.fld{margin-bottom:13px}
+.fld label{display:block;font-size:10px;font-weight:800;color:var(--mt);text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px}
+.fld input,.fld select,.fld textarea{width:100%;padding:12px 13px;background:var(--crd2);border:1.5px solid var(--brd);border-radius:var(--Rs);color:var(--txt);font-size:15px;font-family:var(--F);outline:none;transition:border-color .15s}
+.fld input:focus,.fld select:focus,.fld textarea:focus{border-color:var(--acc)}
+.fld textarea{min-height:70px;resize:vertical}
+
+/* ═══ MODAL ═══ */
+.ov{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.35);backdrop-filter:blur(3px);align-items:flex-end;justify-content:center}
+.ov.open{display:flex}
+.modal-box{background:var(--pnl);border-radius:18px 18px 0 0;padding:18px 16px 30px;width:100%;max-width:520px;max-height:88vh;overflow-y:auto;animation:slUp .22s ease;border-top:3px solid var(--acc);box-shadow:0 -4px 24px rgba(0,0,0,.12)}
+@keyframes slUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.m-handle{width:34px;height:4px;background:var(--brd2);border-radius:2px;margin:0 auto 12px}
+.m-title{font-size:17px;font-weight:900;color:var(--txt);margin-bottom:13px}
+
+/* ═══ SCHEDULE ═══ */
+.sch-w{overflow-x:auto;margin:0 -14px;padding:0 14px}
+.sch-t{width:100%;min-width:620px;border-collapse:collapse;font-size:11px}
+.sch-t th{padding:7px 3px;background:var(--crd2);color:var(--mt);font-weight:700;font-size:9px;text-transform:uppercase;border-bottom:2px solid var(--brd)}
+.sch-t td{padding:5px 2px;text-align:center;border-bottom:1px solid var(--brd)}
+.sch-t .e-nm{text-align:left;padding-left:7px;font-weight:800;font-size:10px;color:var(--txt);white-space:nowrap;position:sticky;left:0;background:var(--pnl);z-index:3;min-width:95px;border-right:1px solid var(--brd)}
+.shc{display:inline-flex;align-items:center;justify-content:center;width:26px;height:22px;border-radius:5px;font-size:9px;font-weight:800;cursor:pointer;transition:transform .1s}
+.shc:hover{transform:scale(1.15)}
+.sch-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
+.sch-lbl{font-size:15px;font-weight:900;color:var(--txt)}
+.sch-nav button{width:34px;height:34px;border-radius:9px;border:1px solid var(--brd);background:var(--pnl);color:var(--tx2);font-size:17px;cursor:pointer;box-shadow:var(--shadow)}
+.sec-r td{background:var(--crd2)!important;padding:5px 7px!important}
+.sec-r-l{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.8px}
+
+/* ═══ MONTHLY VIEW ═══ */
+.mo-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;font-size:10px}
+.mo-hdr{text-align:center;font-size:9px;color:var(--mt);font-weight:700;padding:4px 0}
+.mo-cell{text-align:center;padding:4px 1px;border-radius:6px;min-height:38px;cursor:pointer;transition:background .1s}
+.mo-cell:hover{background:var(--crd2)}
+.mo-cell .day{font-size:10px;color:var(--mt)}
+.mo-cell .shift{font-size:10px;font-weight:800}
+
+/* ═══ LOGIN ═══ */
+.login-screen{display:none;position:fixed;inset:0;z-index:500;background:linear-gradient(155deg,#fff8f1,#f0f4ff,#fdf2f8);flex-direction:column;align-items:center;justify-content:center;padding:22px;overflow-y:auto}
+.login-screen.show{display:flex}
+.lc{background:var(--pnl);border:1px solid var(--brd);border-radius:18px;padding:24px 20px;width:100%;max-width:380px;box-shadow:0 8px 32px rgba(0,0,0,.08)}
+.l-title{font-size:16px;font-weight:900;color:var(--txt);text-align:center;margin-bottom:3px}
+.l-sub{font-size:11px;color:var(--mt);text-align:center;margin-bottom:20px;font-weight:600}
+.l-inp{width:100%;padding:13px 15px;background:var(--crd2);border:1.5px solid var(--brd);border-radius:11px;color:var(--txt);font-size:15px;font-family:var(--F);outline:none;margin-bottom:11px;transition:border-color .15s}
+.l-inp:focus{border-color:var(--acc)}
+.l-inp::placeholder{color:var(--mt2)}
+.l-btn{width:100%;padding:15px;border:none;border-radius:13px;background:linear-gradient(135deg,#ea580c,#c2410c);color:#fff;font-size:15px;font-weight:800;cursor:pointer;font-family:var(--F);box-shadow:0 4px 16px rgba(194,65,12,.2);margin-top:3px;transition:transform .1s}
+.l-btn:active{transform:scale(.97)}
+.l-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.l-btn.blue{background:linear-gradient(135deg,#2563eb,#1d4ed8);box-shadow:0 4px 16px rgba(37,99,235,.2)}
+.l-btn.grn{background:linear-gradient(135deg,#16a34a,#15803d);box-shadow:0 4px 16px rgba(22,163,74,.2)}
+.l-err{display:none;background:var(--redBg);border:1px solid rgba(220,38,38,.2);border-radius:9px;padding:9px;margin-bottom:11px;font-size:12px;color:var(--red);text-align:center;font-weight:700}
+.l-err.show{display:block}
+.l-link{color:var(--blu);font-size:12px;cursor:pointer;text-align:center;margin-top:11px;font-weight:700}
+.l-divider{border-top:1px solid var(--brd);margin:16px 0;position:relative}
+.l-divider::after{content:'OR';position:absolute;top:-8px;left:50%;transform:translateX(-50%);background:var(--pnl);padding:0 10px;font-size:10px;color:var(--mt2);font-weight:700}
+.otp-row{display:flex;gap:8px;justify-content:center;margin:14px 0}
+.otp-inp{width:44px;height:50px;border-radius:11px;border:2px solid var(--brd);background:var(--crd2);color:var(--txt);font-size:22px;font-weight:800;text-align:center;font-family:var(--Fd);outline:none}
+.otp-inp:focus{border-color:var(--acc)}
+
+/* ═══ TOAST ═══ */
+.toast{position:fixed;bottom:94px;left:50%;transform:translateX(-50%);background:var(--txt);color:#fff;padding:11px 20px;border-radius:10px;font-size:12px;font-weight:700;z-index:999;opacity:0;transition:opacity .3s;white-space:nowrap;max-width:90vw;text-align:center;box-shadow:var(--shadow2)}
+.toast.show{opacity:1}
+.empty{text-align:center;padding:36px 20px;color:var(--mt)}.empty-i{font-size:36px;margin-bottom:8px}.empty-t{font-size:13px;font-weight:700}
+
+/* ═══ FINGERPRINT ═══ */
+#fpScr{display:none;position:fixed;inset:0;z-index:450;background:linear-gradient(155deg,#fff8f1,#f0f4ff,#fdf2f8);flex-direction:column;align-items:center;justify-content:center;padding:30px;text-align:center}
+#fpScr.show{display:flex}
+.fp-ring{width:96px;height:96px;border-radius:50%;border:3px solid var(--acc);display:flex;align-items:center;justify-content:center;font-size:40px;cursor:pointer;animation:fpP 2.5s ease infinite;margin-bottom:16px;background:var(--accBg)}
+@keyframes fpP{0%,100%{box-shadow:0 0 0 0 rgba(194,65,12,.2)}50%{box-shadow:0 0 0 16px rgba(194,65,12,0)}}
+.fp-skip{color:var(--blu);font-size:13px;cursor:pointer;font-weight:700}
+
+/* ═══ SA CARDS ═══ */
+.sa-c{background:var(--prpBg);border:1.5px solid rgba(124,58,237,.15);border-radius:var(--R);padding:14px;margin-bottom:10px}
+.legend{display:flex;flex-wrap:wrap;gap:7px;margin-top:7px}
+.leg{display:flex;align-items:center;gap:3px;font-size:10px;color:var(--mt);font-weight:600}
+
+/* ═══ NOTIFICATIONS ═══ */
+.noti-btn{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:var(--crd2);border:1px solid var(--brd);cursor:pointer;font-size:17px;position:relative;transition:.15s}
+.noti-btn:active{background:var(--brd)}
+.noti-dot{position:absolute;top:-3px;right:-3px;min-width:17px;height:17px;background:var(--red);border-radius:9px;font-size:9px;font-weight:800;color:#fff;display:flex;align-items:center;justify-content:center;padding:0 4px;border:2px solid var(--pnl)}
+.noti-item{display:flex;gap:10px;padding:12px;border-bottom:1px solid var(--brd);transition:background .15s}
+.noti-item.unread{background:var(--accBg)}
+.noti-ico{font-size:22px;flex-shrink:0;width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center}
+
+/* ═══ PROGRESS BAR ═══ */
+.prog-wrap{width:100%;background:var(--brd);border-radius:6px;height:8px;overflow:hidden;margin:8px 0}
+.prog-bar{height:100%;background:linear-gradient(90deg,var(--acc),var(--grn));border-radius:6px;transition:width .3s ease}
+
+/* ═══ WHATSAPP QUEUE BADGE ═══ */
+.wa-queue{position:fixed;bottom:92px;right:14px;background:linear-gradient(135deg,#25d366,#128c7e);color:#fff;padding:10px 16px;border-radius:14px;font-size:12px;font-weight:800;cursor:pointer;box-shadow:0 4px 16px rgba(37,211,102,.3);z-index:150;display:none;animation:waPulse 2s ease infinite}
+@keyframes waPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+
+/* ═══ AUDIT LOG ═══ */
+.audit-item{padding:8px 10px;border-bottom:1px solid var(--brd);font-size:11px;color:var(--tx2)}
+.audit-item .audit-time{font-size:9px;color:var(--mt2);font-weight:600}
+.audit-item .audit-action{font-weight:700;color:var(--txt)}
+
+@media(max-width:380px){.pg-t{font-size:17px!important}.stat-v{font-size:22px!important}.nb{font-size:8px;min-width:40px}}
+</style>
+</head>
+<body>
+<div id="rcBox"></div>
+
+<!-- LOADER -->
+<div id="loader">
+  <svg class="mp-logo" width="72" height="72" viewBox="0 0 110 110" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="lg1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#f97316"/><stop offset="50%" stop-color="#a855f7"/><stop offset="100%" stop-color="#38bdf8"/></linearGradient><linearGradient id="lg2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#f97316"/><stop offset="100%" stop-color="#ea580c"/></linearGradient><linearGradient id="lg3" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#38bdf8"/><stop offset="100%" stop-color="#0369a1"/></linearGradient><filter id="glow"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><polygon points="55,4 100,28 100,82 55,106 10,82 10,28" fill="none" stroke="url(#lg1)" stroke-width="2" opacity=".4"/><polygon points="55,10 95,32 95,78 55,100 15,78 15,32" fill="rgba(13,22,35,.9)" stroke="url(#lg1)" stroke-width="1.5"/><text x="35" y="73" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="46" fill="url(#lg2)" filter="url(#glow)">M</text><text x="76" y="73" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="46" fill="url(#lg3)" filter="url(#glow)">P</text><circle cx="55" cy="57" r="4" fill="#f97316" opacity=".9"/></svg>
+  <div class="ld-sub">Man Power</div>
+  <div style="font-size:10px;color:var(--mt2);margin-top:2px">mp.vkstech.com</div>
+  <div class="ld-bar"><div class="ld-fill"></div></div>
+</div>
+
+<!-- ═══ LOGIN SCREEN ═══ -->
+<div class="login-screen" id="loginScr">
+<div style="width:100%;max-width:380px">
+  <div style="text-align:center;margin-bottom:6px">
+    <svg class="mp-logo" width="64" height="64" viewBox="0 0 110 110" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="llg1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#f97316"/><stop offset="50%" stop-color="#a855f7"/><stop offset="100%" stop-color="#38bdf8"/></linearGradient><linearGradient id="llg2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#f97316"/><stop offset="100%" stop-color="#ea580c"/></linearGradient><linearGradient id="llg3" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#38bdf8"/><stop offset="100%" stop-color="#0369a1"/></linearGradient></defs><polygon points="55,4 100,28 100,82 55,106 10,82 10,28" fill="none" stroke="url(#llg1)" stroke-width="2" opacity=".4"/><polygon points="55,10 95,32 95,78 55,100 15,78 15,32" fill="rgba(13,22,35,.9)" stroke="url(#llg1)" stroke-width="1.5"/><text x="35" y="73" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="46" fill="url(#llg2)">M</text><text x="76" y="73" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="46" fill="url(#llg3)">P</text><circle cx="55" cy="57" r="4" fill="#f97316" opacity=".9"/></svg>
+  </div>
+  <div style="font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;text-align:center;color:var(--txt);margin-bottom:1px">Man Power</div>
+  <div class="l-title" data-en="Shift Management System" data-hi="शिफ्ट प्रबंधन प्रणाली">Shift Management System</div>
+  <div class="l-sub" data-en="mp.vkstech.com · For any industry" data-hi="mp.vkstech.com · किसी भी उद्योग के लिए">mp.vkstech.com · For any industry</div>
+  <button class="pwa-btn" id="pwaLoginBtn" onclick="doPWAInstall()" style="display:none">📲 <span data-en="Install App on your Phone" data-hi="अपने फ़ोन पर App इंस्टॉल करें">Install App on your Phone</span></button>
+
+  <!-- Step 1: Phone -->
+  <div class="lc" id="ls1">
+    <div style="font-size:15px;font-weight:900;color:var(--txt);margin-bottom:3px" data-en="Login with Mobile" data-hi="मोबाइल से लॉगिन">Login with Mobile</div>
+    <div style="font-size:11px;color:var(--mt);margin-bottom:14px;font-weight:600" data-en="OTP will be sent to your number" data-hi="आपके नंबर पर OTP भेजा जाएगा">OTP will be sent to your number</div>
+    <div class="l-err" id="lE1"></div>
+    <div style="display:flex;gap:8px;margin-bottom:11px">
+      <div style="padding:13px 10px;background:var(--crd2);border:1.5px solid var(--brd);border-radius:11px;color:var(--mt);font-size:15px;font-weight:800">+91</div>
+      <input class="l-inp" id="lPh" type="tel" inputmode="numeric" placeholder="10 digit mobile" maxlength="10" oninput="this.value=this.value.replace(/\D/g,'').slice(0,10)" style="flex:1;margin-bottom:0">
+    </div>
+    <button class="l-btn" onclick="sendOTP('login')" id="otpBtn" data-en="Send OTP →" data-hi="OTP भेजें →">Send OTP →</button>
+    <div class="l-divider"></div>
+    <div class="l-link" onclick="showMgrReg()" data-en="I'm a Manager — Register New Company" data-hi="मैं मैनेजर हूं — नई कंपनी रजिस्टर करें">I'm a Manager — Register New Company</div>
+    <div class="l-link" onclick="showStep('lsSA')" style="margin-top:6px;color:var(--prp)" data-en="Super Admin Login" data-hi="सुपर एडमिन लॉगिन">Super Admin Login</div>
+  </div>
+
+  <!-- Step 2: OTP Verify -->
+  <div class="lc" id="ls2" style="display:none">
+    <div style="font-size:15px;font-weight:900;color:var(--txt);margin-bottom:3px" data-en="Verify OTP" data-hi="OTP सत्यापित करें">Verify OTP</div>
+    <div style="font-size:11px;color:var(--mt);margin-bottom:4px;font-weight:600" id="otpTo"></div>
+    <div class="l-err" id="lE2"></div>
+    <div class="otp-row" id="otpR">
+      <input class="otp-inp" maxlength="1" inputmode="numeric" oninput="otpNext(this,0)" onkeydown="otpBack(event,this,0)" onfocus="this.select()">
+      <input class="otp-inp" maxlength="1" inputmode="numeric" oninput="otpNext(this,1)" onkeydown="otpBack(event,this,1)" onfocus="this.select()">
+      <input class="otp-inp" maxlength="1" inputmode="numeric" oninput="otpNext(this,2)" onkeydown="otpBack(event,this,2)" onfocus="this.select()">
+      <input class="otp-inp" maxlength="1" inputmode="numeric" oninput="otpNext(this,3)" onkeydown="otpBack(event,this,3)" onfocus="this.select()">
+      <input class="otp-inp" maxlength="1" inputmode="numeric" oninput="otpNext(this,4)" onkeydown="otpBack(event,this,4)" onfocus="this.select()">
+      <input class="otp-inp" maxlength="1" inputmode="numeric" oninput="otpNext(this,5)" onkeydown="otpBack(event,this,5)" onfocus="this.select()">
+    </div>
+    <button class="l-btn grn" onclick="verifyOTP()" data-en="Verify →" data-hi="सत्यापित करें →">Verify →</button>
+    <div class="l-link" onclick="showStep('ls1')">← Back</div>
+  </div>
+
+  <!-- Step 3: Manager Registration -->
+  <div class="lc" id="ls3" style="display:none">
+    <div style="font-size:15px;font-weight:900;color:var(--txt);margin-bottom:3px" data-en="Register as Manager" data-hi="मैनेजर रजिस्ट्रेशन">Register as Manager</div>
+    <div style="font-size:11px;color:var(--mt);margin-bottom:14px;font-weight:600" data-en="Setup your company" data-hi="अपनी कंपनी सेटअप करें">Setup your company</div>
+    <div class="l-err" id="lE3"></div>
+    <input class="l-inp" id="rName" placeholder="Your Full Name">
+    <input class="l-inp" id="rComp" placeholder="Company Name">
+    <select class="l-inp" id="rInd"><option value="">Select Industry...</option><option value="manufacturing">Manufacturing</option><option value="it">IT / Software</option><option value="healthcare">Healthcare</option><option value="retail">Retail</option><option value="logistics">Logistics</option><option value="hospitality">Hospitality</option><option value="security">Security</option><option value="construction">Construction</option><option value="education">Education</option><option value="other">Other</option></select>
+    <button class="l-btn grn" onclick="doMgrReg()" data-en="Create Company →" data-hi="कंपनी बनाएं →">Create Company →</button>
+    <div class="l-link" onclick="showStep('ls1')">← Back</div>
+  </div>
+
+  <!-- Step 4: Setup Departments & Shifts -->
+  <div class="lc" id="ls4" style="display:none;max-height:78vh;overflow-y:auto">
+    <div style="font-size:15px;font-weight:900;color:var(--txt);margin-bottom:3px" data-en="Setup Departments & Shifts" data-hi="विभाग और शिफ्ट सेटअप">Setup Departments & Shifts</div>
+    <div style="font-size:11px;color:var(--mt);margin-bottom:12px;font-weight:600" data-en="Can be changed later in Settings" data-hi="बाद में सेटिंग्स में बदल सकते हैं">Can be changed later in Settings</div>
+    <div style="font-size:12px;font-weight:800;color:var(--acc);margin-bottom:6px">Departments</div>
+    <div id="sDL" style="margin-bottom:8px"></div>
+    <div style="display:flex;gap:6px;margin-bottom:14px">
+      <input class="l-inp" id="sDN" placeholder="Dept name" style="flex:1;margin:0">
+      <input type="color" id="sDC" value="#ea580c" style="width:42px;height:42px;border:none;border-radius:8px;cursor:pointer">
+      <button onclick="addSetupDept()" style="padding:10px 14px;border-radius:10px;border:none;background:var(--acc);color:#fff;font-weight:800;cursor:pointer;font-size:18px">+</button>
+    </div>
+    <div style="font-size:12px;font-weight:800;color:var(--acc);margin-bottom:6px">Shift Types</div>
+    <div id="sSL" style="margin-bottom:8px"></div>
+    <div style="display:flex;gap:5px;margin-bottom:14px">
+      <input class="l-inp" id="sSC" placeholder="D" maxlength="4" style="width:48px;margin:0;text-align:center" oninput="this.value=this.value.toUpperCase()">
+      <input class="l-inp" id="sSLb" placeholder="Day Shift" style="flex:1;margin:0">
+      <input type="color" id="sSCo" value="#f59e0b" style="width:38px;height:38px;border:none;border-radius:7px;cursor:pointer">
+      <button onclick="addSetupShift()" style="padding:8px 12px;border-radius:8px;border:none;background:var(--acc);color:#fff;font-weight:800;cursor:pointer">+</button>
+    </div>
+    <button class="l-btn" onclick="finishSetup()">Finish Setup & Enter App →</button>
+  </div>
+
+  <!-- SA Login -->
+  <div class="lc" id="lsSA" style="display:none">
+    <div style="font-size:15px;font-weight:900;color:var(--txt);margin-bottom:4px">🛡️ Super Admin</div>
+    <div style="font-size:11px;color:var(--mt);margin-bottom:12px;font-weight:600">Admin ID: 8929397949</div>
+    <div class="l-err" id="lESA"></div>
+    <input class="l-inp" id="saP" type="password" placeholder="Enter Password">
+    <input class="l-inp" id="saPConfirm" type="password" placeholder="Confirm Password (first time only)" style="display:none">
+    <div id="saSetupNote" style="display:none;font-size:11px;color:var(--grn);font-weight:700;margin-bottom:10px;padding:8px;background:var(--grnBg);border-radius:8px">🔐 First time login — set your password now.</div>
+    <button class="l-btn" onclick="doSALogin()" id="saBtnLogin" style="background:linear-gradient(135deg,#7c3aed,#6d28d9)">Login →</button>
+    <button class="l-btn grn" onclick="doSASetPassword()" id="saBtnSetup" style="display:none">Set Password & Login →</button>
+    <div class="l-link" onclick="showStep('ls1')">← Back</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ FINGERPRINT SCREEN ═══ -->
+<div id="fpScr">
+  <svg class="mp-logo" width="56" height="56" viewBox="0 0 110 110" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="flg1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#f97316"/><stop offset="50%" stop-color="#a855f7"/><stop offset="100%" stop-color="#38bdf8"/></linearGradient><linearGradient id="flg2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#f97316"/><stop offset="100%" stop-color="#ea580c"/></linearGradient><linearGradient id="flg3" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#38bdf8"/><stop offset="100%" stop-color="#0369a1"/></linearGradient></defs><polygon points="55,4 100,28 100,82 55,106 10,82 10,28" fill="none" stroke="url(#flg1)" stroke-width="2" opacity=".4"/><polygon points="55,10 95,32 95,78 55,100 15,78 15,32" fill="rgba(13,22,35,.9)" stroke="url(#flg1)" stroke-width="1.5"/><text x="35" y="73" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="46" fill="url(#flg2)">M</text><text x="76" y="73" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="46" fill="url(#flg3)">P</text><circle cx="55" cy="57" r="4" fill="#f97316" opacity=".9"/></svg>
+  <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;color:var(--txt);margin-bottom:4px">Man Power</div>
+  <div style="font-size:10px;color:var(--mt);margin-bottom:22px;font-weight:600" id="fpComp">mp.vkstech.com</div>
+  <div class="fp-ring" onclick="tryFingerprint()" id="fpRing">👆</div>
+  <div id="fpT" style="font-size:18px;font-weight:900;color:var(--txt);margin-bottom:4px" data-en="Touch to Login" data-hi="लॉगिन के लिए टच करें">Touch to Login</div>
+  <div id="fpS" style="font-size:12px;color:var(--mt);margin-bottom:16px;font-weight:600" data-en="Use your fingerprint" data-hi="अपना फ़िंगरप्रिंट लगाएं">Use your fingerprint</div>
+  <div id="fpUser" style="margin-top:12px;padding:7px 16px;background:var(--accBg);border:1px solid rgba(194,65,12,.2);border-radius:10px;font-size:13px;color:var(--acc);font-weight:800"></div>
+  <div class="fp-skip" onclick="skipFingerprint()" data-en="Use OTP instead →" data-hi="OTP से लॉगिन →">Use OTP instead →</div>
+</div>
+
+<!-- ═══ HEADER ═══ -->
+<header class="hdr" id="mainHdr" style="display:none">
+  <div class="hdr-top">
+    <div class="hdr-brand"><span id="hdrN">Man Power</span></div>
+    <div class="hdr-r">
+      <div class="hdr-btn" id="langB" onclick="toggleLang()">हि</div>
+      <div class="hdr-btn" onclick="toggleTheme()" id="thB" title="Switch to Dark Mode">🌙</div>
+      <div class="noti-btn" id="notiBtn" onclick="openNotifs()" style="display:none">🔔<div class="noti-dot" id="notiDot" style="display:none">0</div></div>
+      <div class="u-chip" onclick="showProfile()">
+        <div class="u-av" id="uAv">?</div>
+        <div><div class="u-name" id="uNm">—</div><div class="role-t" id="uRl">user</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="sync-r" id="syncR">🔄 <span data-en="Live Sync" data-hi="लाइव सिंक">Live Sync</span> · <span id="syncT">—</span></div>
+  <nav class="nav" id="mainNav"></nav>
+</header>
+
+<!-- ═══ MAIN CONTENT ═══ -->
+<div class="main" id="mainC" style="display:none">
+<div id="verStamp" style="font-size:9px;color:var(--mt2);text-align:right;margin-bottom:4px">v4.0 · mp.vkstech.com</div>
+
+<!-- HOME TAB -->
+<div class="tab on" id="tab-home"><div class="pg-t" id="homeDate"></div><div id="homeView"></div></div>
+
+<!-- SCHEDULE TAB -->
+<div class="tab" id="tab-schedule">
+  <div class="pg-t" data-en="Schedule" data-hi="शेड्यूल">Schedule</div>
+  <div class="sch-nav"><button onclick="moveWeek(-7)">‹</button><div class="sch-lbl" id="schLabel"></div><button onclick="moveWeek(7)">›</button></div>
+  <!-- View Mode Toggle -->
+  <div style="display:flex;gap:6px;margin-bottom:10px">
+    <button class="chip on" id="viewWeek" onclick="setSchView('week')">📅 Weekly</button>
+    <button class="chip" id="viewMonth" onclick="setSchView('month')">🗓️ Monthly</button>
+  </div>
+  <!-- Upload Section (managers only) -->
+  <div id="schUpload" style="background:var(--pnl);border:2px solid var(--brd);border-radius:14px;padding:16px;margin-bottom:14px">
+    <div style="font-size:15px;font-weight:900;color:var(--txt);margin-bottom:4px">📤 Upload Excel (Employees + Shifts)</div>
+    <div style="font-size:11px;color:var(--mt);margin-bottom:12px;line-height:1.5;font-weight:600">
+      Upload your Excel file with: <b style="color:var(--tx2)">S.No, Name, Designation, Employee Code, Mobile, W-OFF, 1, 2, 3...31</b><br>
+      Month auto-detected from sheet name. Shift codes: D, N, O, L, G, Ab, HLF, C/O, GP etc.
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
+      <input type="month" id="xlMo" style="width:100%;padding:10px;background:var(--crd2);border:1px solid var(--brd);border-radius:8px;color:var(--txt);font-size:14px;font-family:var(--F);outline:none">
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <label style="flex:1;min-width:200px;padding:14px;background:var(--crd2);border:2px dashed var(--brd);border-radius:10px;text-align:center;cursor:pointer;font-size:13px;font-weight:700;color:var(--tx2)">
+        📊 Tap to select Excel file
+        <input type="file" id="xlF" accept=".xlsx,.xls,.csv" style="display:none" onchange="previewExcel(this)">
+      </label>
+    </div>
+    <div id="xlPreview" style="display:none;margin-top:10px"></div>
+    <div id="xlProgress" style="display:none;margin-top:10px"></div>
+    <button class="btn-p" onclick="processExcel()" id="xlBtn" style="display:none;margin-top:10px">✅ Upload & Process</button>
+  </div>
+  <div class="act-r" id="schActions">
+    <button class="btn-a" onclick="openAutoScheduler()">🤖 Auto Schedule</button>
+    <button class="btn-s" onclick="openAddEmployee()">+ Add Employee</button>
+    <button class="btn-s" onclick="exportSchedule()">📥 Export</button>
+  </div>
+  <div class="chips" id="schDeptFilter"></div>
+  <div id="schEmpty" style="display:none"></div>
+  <div class="sch-w"><table class="sch-t" id="schTable"></table></div>
+  <!-- Monthly View Container -->
+  <div id="schMonthView" style="display:none"></div>
+  <div class="legend" id="schLegend"></div>
+  <div id="autoBox" style="display:none;margin-top:14px;background:var(--bluBg);border:1.5px solid rgba(37,99,235,.15);border-radius:var(--R);padding:14px">
+    <div style="font-size:13px;font-weight:900;color:var(--blu);margin-bottom:3px">🤖 Smart Auto-Scheduler</div>
+    <div style="font-size:11px;color:var(--mt);margin-bottom:10px;font-weight:600" id="autoInfo"></div>
+    <button class="btn-p" onclick="runAutoScheduler()" style="background:linear-gradient(135deg,#2563eb,#1d4ed8)">Generate Next Month</button>
+  </div>
+</div>
+
+<!-- LEAVE TAB -->
+<div class="tab" id="tab-leave">
+  <div class="pg-t" data-en="Leaves" data-hi="अवकाश">Leaves</div>
+  <div class="act-r"><button class="btn-a" onclick="openLeaveForm()">+ New Leave</button><button class="btn-s" onclick="openResignForm()" style="border-color:rgba(220,38,38,.2);color:var(--red)">📝 Resignation</button></div>
+  <div class="chips" id="lvFilterChips"><div class="chip on" onclick="setLeaveFilter('all',this)">All</div><div class="chip" onclick="setLeaveFilter('pending',this)">⏳ Pending</div><div class="chip" onclick="setLeaveFilter('approved',this)">✅ Approved</div><div class="chip" onclick="setLeaveFilter('rejected',this)">❌ Rejected</div></div>
+  <div id="leaveList"></div>
+</div>
+
+<!-- REPORTS TAB -->
+<div class="tab" id="tab-reports">
+  <div class="pg-t" data-en="Reports" data-hi="रिपोर्ट">Reports</div>
+  <div class="pg-s" data-en="NCR, Absent, Warning, Appreciation" data-hi="NCR, अनुपस्थिति, चेतावनी, प्रशंसा">NCR, Absent, Warning, Appreciation</div>
+  <div class="act-r"><button class="btn-a" onclick="openReportForm()">+ New Report</button></div>
+  <div class="chips" id="rpFilterChips"><div class="chip on" onclick="setReportFilter('all',this)">All</div><div class="chip" onclick="setReportFilter('ncr',this)">⚠️ NCR</div><div class="chip" onclick="setReportFilter('absent',this)">📵 Absent</div><div class="chip" onclick="setReportFilter('warning',this)">⚡ Warning</div><div class="chip" onclick="setReportFilter('appreciation',this)">🌟 Praise</div></div>
+  <div id="reportList"></div>
+</div>
+
+<!-- TODO TAB -->
+<div class="tab" id="tab-todo">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:13px"><div><div class="pg-t" data-en="To-Do" data-hi="कार्य सूची">To-Do</div></div><button class="btn-a" onclick="openTodoForm()">+ New</button></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-bottom:13px">
+    <div class="stat-c"><div class="stat-v" style="color:var(--acc)" id="tdTotal">0</div><div class="stat-l">Total</div></div>
+    <div class="stat-c"><div class="stat-v" style="color:var(--blu)" id="tdPending">0</div><div class="stat-l">Pending</div></div>
+    <div class="stat-c"><div class="stat-v" style="color:var(--grn)" id="tdDone">0</div><div class="stat-l">Done</div></div>
+  </div>
+  <div class="chips" id="tdFilterChips"><div class="chip on" onclick="setTodoFilter('all',this)">All</div><div class="chip" onclick="setTodoFilter('pending',this)">⏳</div><div class="chip" onclick="setTodoFilter('done',this)">✅</div></div>
+  <div id="todoList"></div>
+</div>
+
+<!-- PENDING APPROVALS TAB -->
+<div class="tab" id="tab-pending"><div class="pg-t" data-en="Pending Approvals" data-hi="लंबित अनुमोदन">Pending Approvals</div><div style="font-size:13px;font-weight:800;color:var(--tx2);margin:10px 0 7px">🌴 Leave Requests</div><div id="pendLeaves"></div></div>
+
+<!-- TEAM TAB -->
+<div class="tab" id="tab-team">
+  <div class="pg-t" data-en="Team" data-hi="टीम">Team</div>
+  <div class="act-r" id="teamActions" style="display:none"><button class="btn-a" onclick="openAddEmployee()">+ Add Employee</button><button class="btn-s" onclick="openExcelUpload()">📤 Excel</button></div>
+  <div style="position:relative;margin-bottom:10px"><span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:14px">🔍</span><input type="text" placeholder="Search..." oninput="renderTeam(this.value)" style="width:100%;padding:11px 13px 11px 34px;background:var(--crd2);border:1px solid var(--brd);border-radius:11px;color:var(--txt);font-size:13px;font-family:var(--F);outline:none"></div>
+  <div class="chips" id="teamDeptFilter"></div>
+  <div id="teamList"></div>
+</div>
+
+<!-- INSTRUCTIONS TAB -->
+<div class="tab" id="tab-inst">
+  <div class="pg-t" data-en="Instructions & Rules" data-hi="निर्देश और नियम">Instructions & Rules</div>
+  <div class="act-r" id="instActions" style="display:none"><button class="btn-a" onclick="openAddInstruction()">+ Add</button></div>
+  <div id="instList"></div>
+</div>
+
+<!-- SUPER ADMIN TAB -->
+<div class="tab" id="tab-sa">
+  <div class="pg-t">🛡️ Super Admin Dashboard</div>
+  <div class="pg-s">All managers, workers & analytics</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+    <div class="sa-c"><div class="stat-v" style="color:var(--acc)" id="saMgrCount">0</div><div class="stat-l">Managers</div></div>
+    <div class="sa-c"><div class="stat-v" style="color:var(--blu)" id="saWkrCount">0</div><div class="stat-l">Workers</div></div>
+    <div class="sa-c"><div class="stat-v" style="color:var(--grn)" id="saCompCount">0</div><div class="stat-l">Companies</div></div>
+    <div class="sa-c"><div class="stat-v" style="color:var(--prp)" id="saActCount">0</div><div class="stat-l">Total Users</div></div>
+  </div>
+  <div style="font-size:14px;font-weight:900;color:var(--txt);margin-bottom:8px">All Managers & Teams</div>
+  <div style="margin-bottom:12px">
+    <button class="btn-s" onclick="openChangePassword()" style="width:100%;border-color:rgba(124,58,237,.2);color:var(--prp)">🔐 Change Super Admin Password</button>
+  </div>
+  <div id="saManagerList"></div>
+</div>
+</div>
+
+<!-- WhatsApp Queue Badge -->
+<div class="wa-queue" id="waQueue" onclick="sendWhatsAppQueue()">📱 Send <span id="waCount">0</span> WhatsApp</div>
+
+<!-- MODAL -->
+<div class="ov" id="overlay" onclick="closeModal()"><div class="modal-box" id="modalBox" onclick="event.stopPropagation()"></div></div>
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// MAN POWER v4.0 — COMPLETE IMPROVED APP LOGIC
+// All fixes: Security, Performance, WhatsApp, Audit Trail
+// ═══════════════════════════════════════════════════════
+
+// ─── STATE ───
+let session = {};           // Current user session
+let config = {};            // Company config (depts, shifts)
+let LANG = localStorage.getItem('mp_lang') || 'en';
+let cache = { employees: [], leaves: [], reports: [], todos: [], shifts: {}, instructions: [], notifs: [] };
+let activeTab = 'home';
+let weekStart = null;
+let scheduleView = 'week'; // 'week' or 'month'
+let leaveFilter = 'all', reportFilter = 'all', todoFilter = 'all', deptFilter = 'ALL';
+let otpPurpose = '', otpPhone = '';
+let setupDepts = [], setupShifts = [];
+let whatsAppQueue = [];     // Queue of WhatsApp messages to send
+let renderTimer = null;     // Debounce timer for rendering
+
+// ─── SAFE HELPERS ───
+const esc = s => {
+  const d = document.createElement('div');
+  d.textContent = String(s || '');
+  return d.innerHTML;
+};
+const $ = id => document.getElementById(id);
+const dateKey = d => d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+const T = (en, hi) => LANG === 'hi' ? hi : en;
+const updateSyncTime = () => { const el = $('syncT'); if(el) el.textContent = new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}) };
+
+// ─── TOAST ───
+let toastTimer = null;
+function toast(msg) {
+  const el = $('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+// ─── FIREBASE WRAPPER (clear names) ───
+async function fbGet(path) { const snap = await window._fb('get', path); return snap.exists() ? snap.val() : null }
+async function fbSet(path, val) { await window._fb('set', path, val); updateSyncTime() }
+async function fbPush(path, val) { const r = await window._fb('push', path, val); updateSyncTime(); return r.key }
+async function fbUpdate(path, val) { await window._fb('update', path, val); updateSyncTime() }
+async function fbRemove(path) { await window._fb('remove', path); updateSyncTime() }
+function fbListen(path, cb) { window._fb('listen', path, snap => { cb(snap.exists() ? snap.val() : null) }) }
+
+// Manager-scoped helpers
+function mgrPath(sub) { return 'managers/' + (session.managerId || '_') + '/' + sub }
+async function mgrGet(sub) { return fbGet(mgrPath(sub)) }
+async function mgrSet(sub, val) { return fbSet(mgrPath(sub), val) }
+async function mgrPush(sub, val) { return fbPush(mgrPath(sub), val) }
+async function mgrUpdate(sub, val) { return fbUpdate(mgrPath(sub), val) }
+async function mgrRemove(sub) { return fbRemove(mgrPath(sub)) }
+function mgrListen(sub, cb) { fbListen(mgrPath(sub), cb) }
+
+// ─── SHA-256 HASH ───
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return [...new Uint8Array(buf)].map(x => x.toString(16).padStart(2,'0')).join('');
+}
+
+// ─── ROLES ───
+const isManager = () => session.role === 'manager';
+const isTeamLead = () => session.role === 'teamlead';
+const isSuperAdmin = () => session.role === 'superadmin';
+const isWorker = () => session.role === 'worker';
+const isAdmin = () => session.role === 'manager' || session.role === 'superadmin' || session.role === 'teamlead';
+const canEditShift = () => session.role === 'manager' || session.role === 'teamlead';
+const canAddRemove = () => session.role === 'manager';
+const getEmployees = () => cache.employees || [];
+
+// ─── SESSION (encrypted with HMAC-like key) ───
+const SESSION_KEY = 'mp_session_v4';
+function saveSession() {
+  session.lastActive = new Date().toISOString();
+  try {
+    // Use a simple reversible encoding — NOT security, just obfuscation
+    const data = JSON.stringify(session);
+    const encoded = btoa(unescape(encodeURIComponent(data)));
+    localStorage.setItem(SESSION_KEY, encoded);
+  } catch(e) { console.warn('Session save error:', e) }
+}
+function loadSession() {
+  try {
+    const raw = localStorage.getItem(SESSION_KEY);
+    if (!raw) return false;
+    const data = JSON.parse(decodeURIComponent(escape(atob(raw))));
+    // Session expiry check (30 days)
+    if (data && data.role) {
+      const age = Date.now() - new Date(data.lastActive || 0).getTime();
+      if (age > 30 * 24 * 60 * 60 * 1000) { clearSession(); return false; }
+      session = data;
+      return true;
+    }
+  } catch(e) { console.warn('Session load error:', e) }
+  return false;
+}
+function clearSession() {
+  session = {};
+  try { localStorage.removeItem(SESSION_KEY); localStorage.removeItem('fp_cred'); } catch(e) {}
+}
+
+// ─── LANGUAGE ───
+function toggleLang() {
+  LANG = LANG === 'en' ? 'hi' : 'en';
+  localStorage.setItem('mp_lang', LANG);
+  $('langB').textContent = LANG === 'en' ? 'हि' : 'EN';
+  document.querySelectorAll('[data-en]').forEach(el => {
+    el.innerHTML = LANG === 'en' ? el.dataset.en : (el.dataset.hi || el.dataset.en);
+  });
+  renderActiveTab();
+}
+
+// ─── THEME ───
+function toggleTheme() {
+  document.body.classList.toggle('dark');
+  const isDark = document.body.classList.contains('dark');
+  $('thB').textContent = isDark ? '☀️' : '🌙';
+  localStorage.setItem('mp_th', isDark ? 'd' : 'l');
+}
+if (localStorage.getItem('mp_th') === 'd') document.body.classList.add('dark');
+
+// ─── LOGIN UI ───
+function showStep(id) {
+  ['ls1','ls2','ls3','ls4','lsSA'].forEach(x => { const el = $(x); if(el) el.style.display = 'none' });
+  const el = $(id); if(el) el.style.display = 'block';
+  if (id === 'lsSA') checkSASetup();
+}
+function showMgrReg() { otpPurpose = 'mgrReg'; showStep('ls1'); $('lPh').focus() }
+function showError(panel, msg) {
+  const ids = {1:'lE1', 2:'lE2', 3:'lE3', sa:'lESA'};
+  const el = $(ids[panel]);
+  if(el) { el.textContent = msg; el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 4000) }
+}
+
+// ─── OTP ───
+async function sendOTP(purpose) {
+  const phone = $('lPh').value.trim();
+  if (phone.length !== 10) { showError(1, T('Enter 10 digit number','10 अंक दर्ज करें')); return }
+  otpPhone = phone;
+  if (purpose === 'login') {
+    const mgrExists = await fbGet('mgrIdx/' + phone);
+    const wkrExists = await fbGet('wkrIdx/' + phone);
+    otpPurpose = (!mgrExists && !wkrExists) ? 'mgrReg' : 'login';
+  } else { otpPurpose = purpose }
+
+  const btn = $('otpBtn');
+  btn.textContent = '⏳ Sending...'; btn.disabled = true;
+  try {
+    const result = await window._sendOTP('+91' + phone);
+    if (result.ok) {
+      $('otpTo').textContent = T('OTP sent to +91-'+phone, 'OTP भेजा गया +91-'+phone);
+      showStep('ls2');
+      setTimeout(() => { const inputs = document.querySelectorAll('#otpR .otp-inp'); if(inputs[0]) inputs[0].focus() }, 200);
+    } else { showError(1, 'Error: ' + (result.error || 'Failed')) }
+  } catch(e) { showError(1, 'Error: ' + e.message) }
+  btn.textContent = T('Send OTP →','OTP भेजें →'); btn.disabled = false;
+}
+function otpNext(el, idx) {
+  if (el.value.length === 1) {
+    const inputs = document.querySelectorAll('#otpR .otp-inp');
+    if (inputs[idx+1]) inputs[idx+1].focus();
+  }
+}
+function otpBack(e, el, idx) {
+  if (e.key === 'Backspace' && !el.value && idx > 0) {
+    const inputs = document.querySelectorAll('#otpR .otp-inp');
+    inputs[idx-1].focus();
+  }
+}
+async function verifyOTP() {
+  const code = [...document.querySelectorAll('#otpR .otp-inp')].map(i => i.value).join('');
+  if (code.length !== 6) { showError(2, T('Enter 6 digits','6 अंक दर्ज करें')); return }
+  try {
+    await window._confirmOTP(code);
+    toast('✅ ' + T('Verified!','सत्यापित!'));
+    if (otpPurpose === 'mgrReg') {
+      const existing = await fbGet('mgrIdx/' + otpPhone);
+      if (existing) { await loginAsManager(existing) } else { showStep('ls3') }
+    } else {
+      const mgrId = await fbGet('mgrIdx/' + otpPhone);
+      if (mgrId) { await loginAsManager(mgrId); return }
+      const wkrInfo = await fbGet('wkrIdx/' + otpPhone);
+      if (wkrInfo) { await loginAsWorker(wkrInfo); return }
+      showStep('ls3');
+    }
+  } catch(e) { showError(2, T('Wrong OTP','गलत OTP')) }
+}
+
+// ─── MANAGER LOGIN / REGISTRATION ───
+async function loginAsManager(managerId) {
+  const profile = await fbGet('managers/' + managerId + '/profile');
+  if (!profile) { showError(2, 'Not found'); return }
+  const cfg = await fbGet('managers/' + managerId + '/config');
+  session = { role:'manager', name:profile.name, phone:profile.phone, managerId, company:profile.company, industry:profile.industry };
+  config = { depts: cfg?.departments || {}, shifts: cfg?.shiftTypes || {} };
+  saveSession(); 
+  if (!Object.keys(config.depts).length) { initSetupDefaults(); showStep('ls4'); return }
+  launchApp();
+  setTimeout(() => registerFingerprint(), 1500);
+}
+async function doMgrReg() {
+  const name = $('rName').value.trim(), company = $('rComp').value.trim(), industry = $('rInd').value;
+  if (!name || !company || !industry) { showError(3, T('Fill all fields','सभी भरें')); return }
+  try {
+    const managerId = 'm_' + Date.now();
+    await fbSet('managers/' + managerId + '/profile', { name, phone: otpPhone, company, industry, createdAt: new Date().toISOString() });
+    await fbSet('mgrIdx/' + otpPhone, managerId);
+    session = { role:'manager', name, phone: otpPhone, managerId, company, industry };
+    config = { depts:{}, shifts:{} };
+    saveSession(); initSetupDefaults(); showStep('ls4');
+  } catch(e) { showError(3, 'Error: ' + e.message) }
+}
+
+// ─── SETUP (Depts & Shifts) ───
+function initSetupDefaults() {
+  setupDepts = [];
+  setupShifts = [
+    {code:'D', label:'Day', color:'#f59e0b'}, {code:'N', label:'Night', color:'#818cf8'},
+    {code:'O', label:'Off', color:'#94a3b8'}, {code:'L', label:'Leave', color:'#ef4444'},
+    {code:'G', label:'General', color:'#3b82f6'}, {code:'HLF', label:'Half Day', color:'#fb923c'},
+    {code:'Ab', label:'Absent', color:'#dc2626'}, {code:'C/O', label:'Comp Off', color:'#06b6d4'},
+    {code:'GP', label:'Gate Pass', color:'#14b8a6'}, {code:'H', label:'Holiday', color:'#ec4899'}
+  ];
+  renderSetupDepts(); renderSetupShifts();
+}
+function renderSetupDepts() {
+  $('sDL').innerHTML = setupDepts.length ? setupDepts.map((d,i) =>
+    `<div style="display:flex;align-items:center;gap:7px;padding:7px 8px;background:var(--crd2);border:1px solid var(--brd);border-radius:8px;margin-bottom:5px">
+      <div style="width:14px;height:14px;border-radius:3px;background:${esc(d.color)}"></div>
+      <div style="flex:1;font-size:13px;font-weight:800;color:var(--txt)">${esc(d.name)}</div>
+      <button onclick="setupDepts.splice(${i},1);renderSetupDepts()" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:14px">✕</button>
+    </div>`).join('') :
+    '<div style="text-align:center;padding:14px;color:var(--mt2);font-size:12px;font-weight:600">Add at least 1 department</div>';
+}
+function addSetupDept() {
+  const name = $('sDN').value.trim(), color = $('sDC').value;
+  if (!name) return;
+  const key = name.toUpperCase().replace(/\s+/g,'_').slice(0,12);
+  setupDepts.push({ name, color, key });
+  $('sDN').value = ''; renderSetupDepts();
+}
+function renderSetupShifts() {
+  $('sSL').innerHTML = setupShifts.map((s,i) =>
+    `<span style="display:inline-flex;align-items:center;gap:3px;padding:3px 8px;border-radius:6px;background:${esc(s.color)}15;border:1px solid ${esc(s.color)}30;margin:0 3px 5px 0;font-size:10px;font-weight:800;color:${esc(s.color)}">
+      ${esc(s.code)} <span style="color:var(--mt)">${esc(s.label)}</span>
+      <button onclick="setupShifts.splice(${i},1);renderSetupShifts()" style="background:none;border:none;color:var(--mt2);cursor:pointer;font-size:9px;margin-left:2px">✕</button>
+    </span>`).join('');
+}
+function addSetupShift() {
+  const code = $('sSC').value.trim(), label = $('sSLb').value.trim(), color = $('sSCo').value;
+  if (!code || !label) return;
+  if (setupShifts.find(s => s.code === code)) { toast('Code exists'); return }
+  setupShifts.push({ code, label, color });
+  $('sSC').value = ''; $('sSLb').value = ''; renderSetupShifts();
+}
+async function finishSetup() {
+  if (!setupDepts.length) { toast(T('Add 1+ department','1+ विभाग जोड़ें')); return }
+  if (setupShifts.length < 2) { toast('Add 2+ shift types'); return }
+  const depts = {}, shifts = {};
+  setupDepts.forEach(d => { depts[d.key] = { name: d.name, color: d.color } });
+  setupShifts.forEach(s => { shifts[s.code] = { label: s.label, color: s.color } });
+  try {
+    await mgrSet('config/departments', depts);
+    await mgrSet('config/shiftTypes', shifts);
+    config.depts = depts; config.shifts = shifts;
+    toast('✅ Setup complete!'); launchApp();
+    setTimeout(() => registerFingerprint(), 1500);
+  } catch(e) { toast('Error: ' + e.message) }
+}
+
+// ─── WORKER LOGIN ───
+async function loginAsWorker(workerInfo) {
+  const profile = await fbGet('managers/' + workerInfo.managerId + '/profile');
+  const emp = await fbGet('managers/' + workerInfo.managerId + '/employees/' + workerInfo.empId);
+  const cfg = await fbGet('managers/' + workerInfo.managerId + '/config');
+  if (!emp) { showError(2, 'Employee not found'); return }
+  const role = emp.isTeamLead ? 'teamlead' : 'worker';
+  session = { role, name: emp.name, phone: otpPhone, managerId: workerInfo.managerId, empId: workerInfo.empId, company: profile?.company || '' };
+  config = { depts: cfg?.departments || {}, shifts: cfg?.shiftTypes || {} };
+  saveSession(); launchApp();
+  setTimeout(() => registerFingerprint(), 1500);
+}
+
+// ─── SUPER ADMIN ───
+async function doSALogin() {
+  const pwd = $('saP').value.trim();
+  if (!pwd) { showError('sa', T('Enter password','पासवर्ड दर्ज करें')); return }
+  try {
+    const storedHash = await fbGet('superadmin/passHash');
+    if (!storedHash) {
+      $('saPConfirm').style.display = ''; $('saSetupNote').style.display = '';
+      $('saBtnLogin').style.display = 'none'; $('saBtnSetup').style.display = '';
+      showError('sa', T('First time — set your password below','पहली बार — नीचे पासवर्ड सेट करें'));
+      return;
+    }
+    const hash = await sha256(pwd);
+    if (hash !== storedHash) { showError('sa', T('Wrong password','गलत पासवर्ड')); return }
+    session = { role:'superadmin', name:'Super Admin', saId:'8929397949' };
+    saveSession(); launchApp();
+  } catch(e) { showError('sa', 'Error: ' + e.message) }
+}
+async function doSASetPassword() {
+  const pwd = $('saP').value.trim(), pwd2 = $('saPConfirm').value.trim();
+  if (!pwd || pwd.length < 6) { showError('sa', T('Password must be 6+ characters','पासवर्ड 6+ अक्षर')); return }
+  if (pwd !== pwd2) { showError('sa', T('Passwords do not match','पासवर्ड मेल नहीं खाते')); return }
+  try {
+    const hash = await sha256(pwd);
+    await fbSet('superadmin/passHash', hash);
+    await fbSet('superadmin/createdAt', new Date().toISOString());
+    session = { role:'superadmin', name:'Super Admin', saId:'8929397949' };
+    saveSession(); toast('✅ ' + T('Password set!','पासवर्ड सेट!')); launchApp();
+  } catch(e) { showError('sa', 'Error: ' + e.message) }
+}
+async function checkSASetup() {
+  try {
+    const storedHash = await fbGet('superadmin/passHash');
+    if (!storedHash) {
+      $('saPConfirm').style.display = ''; $('saSetupNote').style.display = '';
+      $('saBtnLogin').style.display = 'none'; $('saBtnSetup').style.display = '';
+    } else {
+      $('saPConfirm').style.display = 'none'; $('saSetupNote').style.display = 'none';
+      $('saBtnLogin').style.display = ''; $('saBtnSetup').style.display = 'none';
+    }
+  } catch(e) {}
+}
+
+// ─── FINGERPRINT ───
+async function registerFingerprint() {
+  if (!window.PublicKeyCredential) return;
+  try {
+    const uid = session.phone || session.name || 'user';
+    const cred = await navigator.credentials.create({
+      publicKey: {
+        challenge: new Uint8Array(32), rp: { name: 'Man Power' },
+        user: { id: new TextEncoder().encode(uid), name: uid, displayName: session.name || 'User' },
+        pubKeyCredParams: [{ type: 'public-key', alg: -7 }],
+        authenticatorSelection: { authenticatorAttachment: 'platform', userVerification: 'required' },
+        timeout: 60000
+      }
+    });
+    if (cred) {
+      localStorage.setItem('fp_cred', JSON.stringify({ id: [...new Uint8Array(cred.rawId)], t: cred.type }));
+      localStorage.setItem('fp_session', btoa(unescape(encodeURIComponent(JSON.stringify(session)))));
+    }
+  } catch(e) { /* Fingerprint not supported or denied */ }
+}
+function showFingerprintScreen() {
+  $('fpScr').classList.add('show');
+  $('fpComp').textContent = session.company || 'mp.vkstech.com';
+  $('fpUser').textContent = session.name || '';
+}
+async function tryFingerprint() {
+  const credData = localStorage.getItem('fp_cred');
+  if (!credData) return skipFingerprint();
+  try {
+    const cred = JSON.parse(credData);
+    const assertion = await navigator.credentials.get({
+      publicKey: {
+        challenge: new Uint8Array(32),
+        allowCredentials: [{ id: new Uint8Array(cred.id), type: 'public-key' }],
+        userVerification: 'required', timeout: 60000
+      }
+    });
+    if (assertion) {
+      const savedSession = localStorage.getItem('fp_session');
+      if (savedSession) session = JSON.parse(decodeURIComponent(escape(atob(savedSession))));
+      saveSession();
+      $('fpScr').classList.remove('show');
+      if (session.managerId) {
+        const cfg = await fbGet('managers/' + session.managerId + '/config');
+        config = { depts: cfg?.departments || {}, shifts: cfg?.shiftTypes || {} };
+      }
+      launchApp();
+    }
+  } catch(e) {
+    $('fpT').textContent = T('Try again or use OTP','पुनः प्रयास करें');
+  }
+}
+function skipFingerprint() {
+  $('fpScr').classList.remove('show');
+  $('loginScr').classList.add('show'); showStep('ls1');
+}
+
+// ═══════════════════════════════════════════
+// LAUNCH APP
+// ═══════════════════════════════════════════
+async function launchApp() {
+  $('loader').style.display = 'none';
+  $('loginScr').classList.remove('show'); $('loginScr').style.display = 'none';
+  $('fpScr').classList.remove('show'); $('fpScr').style.display = 'none';
+  $('mainHdr').style.display = 'block'; $('mainC').style.display = 'block';
+  
+  // Load config if needed
+  if (session.managerId && (!config.depts || !Object.keys(config.depts).length)) {
+    try {
+      const cfg = await mgrGet('config');
+      config = { depts: cfg?.departments || {}, shifts: cfg?.shiftTypes || {} };
+    } catch(e) {}
+  }
+  
+  // Update header
+  $('hdrN').textContent = session.company || 'Man Power';
+  $('uNm').textContent = session.name || '—';
+  $('uAv').textContent = (session.name || '?').charAt(0).toUpperCase();
+  const roleEl = $('uRl');
+  roleEl.textContent = session.role === 'teamlead' ? 'Team Lead' : session.role;
+  roleEl.className = 'role-t ' + (isSuperAdmin() ? 'sa' : isManager() ? 'mgr' : isTeamLead() ? 'teamlead' : 'wkr');
+  $('langB').textContent = LANG === 'en' ? 'हि' : 'EN';
+  
+  buildNavBar();
+  initWeekStart();
+  if (!isSuperAdmin()) setupListeners();
+  if (isSuperAdmin()) loadSuperAdmin();
+  goToTab('home');
+}
+
+// ─── NAV BAR ───
+function buildNavBar() {
+  const tabs = [
+    {id:'home',icon:'🏠',en:'Home',hi:'होम',roles:['manager','worker','teamlead','superadmin']},
+    {id:'schedule',icon:'📅',en:'Schedule',hi:'शेड्यूल',roles:['manager','worker','teamlead']},
+    {id:'leave',icon:'🏖️',en:'Leaves',hi:'अवकाश',roles:['manager','worker','teamlead']},
+    {id:'reports',icon:'📋',en:'Reports',hi:'रिपोर्ट',roles:['manager','worker','teamlead']},
+    {id:'todo',icon:'✅',en:'To-Do',hi:'कार्य',roles:['manager','worker','teamlead']},
+    {id:'pending',icon:'⏳',en:'Pending',hi:'लंबित',roles:['manager']},
+    {id:'team',icon:'👥',en:'Team',hi:'टीम',roles:['manager','teamlead']},
+    {id:'inst',icon:'📌',en:'Rules',hi:'नियम',roles:['manager','worker','teamlead']},
+    {id:'sa',icon:'🛡️',en:'Admin',hi:'एडमिन',roles:['superadmin']}
+  ].filter(t => t.roles.includes(session.role));
+  
+  $('mainNav').innerHTML = tabs.map((t,i) =>
+    `<button class="nb${i===0?' on':''}" id="nb-${t.id}" onclick="goToTab('${t.id}')">
+      <span class="nb-i">${t.icon}</span><span>${LANG==='hi'?t.hi:t.en}</span>
+      ${t.id==='pending'?'<span class="nb-b" id="pendBadge" style="display:none">0</span>':''}
+    </button>`
+  ).join('');
+}
+
+function goToTab(tab) {
+  activeTab = tab;
+  document.querySelectorAll('.tab').forEach(el => el.classList.remove('on'));
+  const tabEl = $('tab-' + tab); if(tabEl) tabEl.classList.add('on');
+  document.querySelectorAll('.nb').forEach(b => b.classList.remove('on'));
+  const navBtn = $('nb-' + tab); if(navBtn) navBtn.classList.add('on');
+  renderActiveTab();
+}
+
+// ─── MODAL ───
+function openModal(html) { $('modalBox').innerHTML = html; $('overlay').classList.add('open') }
+function closeModal() { $('overlay').classList.remove('open') }
+
+// ─── DEBOUNCED RENDER ───
+function renderActiveTab() {
+  try {
+    switch(activeTab) {
+      case 'home': renderHome(); break;
+      case 'schedule': renderSchedule(); break;
+      case 'leave': renderLeaves(); break;
+      case 'reports': renderReports(); break;
+      case 'todo': renderTodos(); break;
+      case 'team': renderTeam(); break;
+      case 'pending': renderPending(); break;
+      case 'inst': renderInstructions(); break;
+    }
+    // Update pending badge
+    const pendCount = cache.leaves.filter(l => l.status === 'pending').length;
+    const badge = $('pendBadge');
+    if(badge) { badge.style.display = pendCount ? '' : 'none'; badge.textContent = pendCount }
+    updateNotifBadge();
+  } catch(e) { console.error('Render error:', e) }
+}
+function debouncedRender() {
+  clearTimeout(renderTimer);
+  renderTimer = setTimeout(renderActiveTab, 150);
+}
+
+// ─── FIREBASE LISTENERS (with debounce) ───
+function setupListeners() {
+  mgrListen('employees', val => { cache.employees = val ? Object.values(val) : []; debouncedRender() });
+  mgrListen('leaves', val => { cache.leaves = val ? Object.entries(val).map(([k,v]) => ({...v, _key:k})) : []; debouncedRender() });
+  mgrListen('reports', val => { cache.reports = val ? Object.entries(val).map(([k,v]) => ({...v, _key:k})) : []; debouncedRender() });
+  mgrListen('todos', val => { cache.todos = val ? Object.entries(val).map(([k,v]) => ({...v, _key:k})) : []; debouncedRender() });
+  mgrListen('shifts', val => { cache.shifts = val || {}; debouncedRender() });
+  mgrListen('instructions', val => { cache.instructions = val ? Object.entries(val).map(([k,v]) => ({...v, _key:k})) : []; debouncedRender() });
+  // Personal notifications
+  const nfKey = session.empId || session.managerId || session.phone || '';
+  if (nfKey) {
+    mgrListen('notifs/' + nfKey, val => {
+      cache.notifs = val ? Object.entries(val).map(([k,v]) => ({...v, _key:k})).sort((a,b) => (b.at||'').localeCompare(a.at||'')) : [];
+      updateNotifBadge();
+    });
+  }
+}
+
+function initWeekStart() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  weekStart = new Date(today); weekStart.setDate(today.getDate() - today.getDay());
+}
+function moveWeek(days) { weekStart.setDate(weekStart.getDate() + days); renderSchedule() }
+
+// ═══════════════════════════════════════════
+// NOTIFICATIONS
+// ═══════════════════════════════════════════
+function updateNotifBadge() {
+  const btn = $('notiBtn'), dot = $('notiDot');
+  if (!btn) return;
+  btn.style.display = isSuperAdmin() ? 'none' : '';
+  const unread = cache.notifs.filter(n => !n.read).length;
+  if (dot) { dot.style.display = unread > 0 ? '' : 'none'; dot.textContent = unread > 9 ? '9+' : unread }
+}
+async function pushNotification(empKey, title, body, icon, type) {
+  if (!empKey) return;
+  try { await mgrPush('notifs/' + empKey, { title, body, icon: icon||'📋', type: type||'info', read: false, by: session.name||'System', at: new Date().toISOString() }) }
+  catch(e) { console.warn('Notification push error:', e) }
+}
+function openNotifs() {
+  const list = cache.notifs;
+  openModal(`<div class="m-handle"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <div class="m-title" style="margin-bottom:0">🔔 ${T('Notifications','सूचनाएं')}</div>
+      ${list.some(n=>!n.read)?`<button onclick="markAllNotifRead()" style="font-size:11px;font-weight:700;color:var(--blu);background:none;border:none;cursor:pointer">${T('Mark all read','सभी पढ़ें')}</button>`:''}
+    </div>
+    <div style="max-height:70vh;overflow-y:auto">
+      ${list.length ? list.slice(0,30).map(n =>
+        `<div class="noti-item${n.read?'':' unread'}">
+          <div class="noti-ico" style="background:${n.type==='shift'?'var(--accBg)':n.type==='leave_approved'?'var(--grnBg)':n.type==='leave_rejected'?'var(--redBg)':'var(--bluBg)'}">${esc(n.icon||'📋')}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;font-weight:800;color:var(--txt);margin-bottom:2px">${esc(n.title)}</div>
+            <div style="font-size:11px;color:var(--mt);font-weight:600;line-height:1.4">${esc(n.body)}</div>
+            <div style="font-size:9px;color:var(--mt2);font-weight:600;margin-top:3px">${n.by?esc(n.by)+' · ':''}${timeAgo(n.at)}</div>
+          </div>
+        </div>`).join('') :
+        `<div class="empty"><div class="empty-i">🔔</div><div class="empty-t">${T('No notifications','कोई सूचना नहीं')}</div></div>`}
+    </div>`);
+  setTimeout(() => markAllNotifRead(), 1500);
+}
+async function markAllNotifRead() {
+  const nfKey = session.empId || session.managerId || session.phone || '';
+  if (!nfKey) return;
+  const updates = {};
+  cache.notifs.filter(n => !n.read).forEach(n => { updates['notifs/' + nfKey + '/' + n._key + '/read'] = true });
+  if (Object.keys(updates).length) {
+    try { await fbUpdate(mgrPath(''), updates) } catch(e) {}
+  }
+}
+function timeAgo(dateStr) {
+  if (!dateStr) return '';
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return T('Just now','अभी');
+  if (mins < 60) return mins + T(' min ago',' मिनट पहले');
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return hrs + T(' hr ago',' घंटे पहले');
+  const days = Math.floor(hrs / 24);
+  if (days < 7) return days + T(' day ago',' दिन पहले');
+  return new Date(dateStr).toLocaleDateString('en-IN', { day:'numeric', month:'short' });
+}
+
+// ═══════════════════════════════════════════
+// WHATSAPP QUEUE SYSTEM
+// ═══════════════════════════════════════════
+function addToWhatsAppQueue(phone, message, empName) {
+  if (!phone || phone.length < 10) return;
+  const cleanPhone = phone.replace(/\D/g, '');
+  // Prevent duplicates (same phone + same message)
+  const exists = whatsAppQueue.find(q => q.phone === cleanPhone && q.message === message);
+  if (exists) return;
+  whatsAppQueue.push({ phone: cleanPhone, message, empName, added: Date.now() });
+  updateWhatsAppBadge();
+}
+function updateWhatsAppBadge() {
+  const badge = $('waQueue'), countEl = $('waCount');
+  if (whatsAppQueue.length > 0) {
+    badge.style.display = 'flex';
+    countEl.textContent = whatsAppQueue.length;
+  } else {
+    badge.style.display = 'none';
+  }
+}
+function sendWhatsAppQueue() {
+  if (!whatsAppQueue.length) return;
+  const item = whatsAppQueue[0];
+  const encodedMsg = encodeURIComponent(item.message);
+  const isAndroid = /android/i.test(navigator.userAgent);
+  
+  if (isAndroid) {
+    const fallback = encodeURIComponent('https://wa.me/91' + item.phone + '?text=' + encodedMsg);
+    window.open('intent://send?phone=91' + item.phone + '&text=' + encodedMsg + '#Intent;scheme=whatsapp;package=com.whatsapp;S.browser_fallback_url=' + fallback + ';end', '_blank');
+  } else {
+    window.open('https://wa.me/91' + item.phone + '?text=' + encodedMsg, '_blank');
+  }
+  
+  whatsAppQueue.shift(); // Remove sent item
+  toast('📱 ' + T('WhatsApp opened for ','WhatsApp खुला ') + esc(item.empName));
+  updateWhatsAppBadge();
+  
+  // Auto-open next after delay
+  if (whatsAppQueue.length > 0) {
+    setTimeout(() => {
+      if (whatsAppQueue.length > 0 && confirm(T('Send next WhatsApp to ' + whatsAppQueue[0].empName + '?', whatsAppQueue[0].empName + ' को WhatsApp भेजें?'))) {
+        sendWhatsAppQueue();
+      }
+    }, 2000);
+  }
+}
+
+// ═══════════════════════════════════════════
+// AUDIT TRAIL
+// ═══════════════════════════════════════════
+async function logAudit(action, details) {
+  try {
+    await mgrPush('auditLog', {
+      action, details, by: session.name || 'Unknown',
+      role: session.role, at: new Date().toISOString()
+    });
+  } catch(e) { /* Silent fail for audit */ }
+}
+
+// ═══════════════════════════════════════════
+// HOME TAB
+// ═══════════════════════════════════════════
+function renderHome() {
+  try {
+    const today = new Date();
+    const dayNames = LANG==='hi' ? ['रवि','सोम','मंगल','बुध','गुरु','शुक्र','शनि'] : ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    const monthNames = LANG==='hi' ? ['जन','फर','मार्च','अप्रैल','मई','जून','जुला','अग','सित','अक्टू','नव','दिस'] : ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    $('homeDate').textContent = dayNames[today.getDay()] + ', ' + today.getDate() + ' ' + monthNames[today.getMonth()] + ' ' + today.getFullYear();
+
+    if (isSuperAdmin()) {
+      $('homeView').innerHTML = '<div class="crd" onclick="goToTab(\'sa\')" style="cursor:pointer"><div class="crd-n">🛡️ Super Admin Dashboard</div><div class="crd-s">View all managers & workers</div></div>';
+      return;
+    }
+    const emps = getEmployees().filter(e => e.status !== 'left');
+    const todayKey = dateKey(today);
+
+    if (isManager() || isTeamLead()) {
+      if (!emps.length) {
+        $('homeView').innerHTML = `<div style="text-align:center;padding:30px 16px">
+          <div style="font-size:48px;margin-bottom:10px">👋</div>
+          <div style="font-size:18px;font-weight:900;color:var(--txt);margin-bottom:6px">${T('Welcome, '+session.name+'!','स्वागत है, '+session.name+'!')}</div>
+          <div style="font-size:13px;color:var(--mt);margin-bottom:20px;line-height:1.6;font-weight:600">${T('Start by uploading your Excel file with employee details and shift schedule.','एक्सेल फ़ाइल अपलोड करके शुरू करें।')}</div>
+          <button class="btn-a" onclick="goToTab('schedule')" style="font-size:14px;padding:14px 28px;border-radius:14px">📅 ${T('Go to Schedule','शेड्यूल पर जाएं')}</button>
+        </div>`;
+        return;
+      }
+      let onDuty=0, onLeave=0, absent=0;
+      emps.forEach(e => {
+        const shift = cache.shifts[todayKey]?.[e.id];
+        if (!shift || shift==='O') return;
+        if (shift==='L') onLeave++; else if (shift==='Ab') absent++; else onDuty++;
+      });
+      $('homeView').innerHTML = `
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:7px;margin-bottom:14px">
+          <div class="stat-c"><div class="stat-v" style="color:var(--acc)">${emps.length}</div><div class="stat-l">${T('Total','कुल')}</div></div>
+          <div class="stat-c"><div class="stat-v" style="color:var(--grn)">${onDuty}</div><div class="stat-l">${T('On Duty','ड्यूटी')}</div></div>
+          <div class="stat-c"><div class="stat-v" style="color:var(--blu)">${onLeave}</div><div class="stat-l">${T('Leave','छुट्टी')}</div></div>
+          <div class="stat-c"><div class="stat-v" style="color:var(--red)">${absent}</div><div class="stat-l">${T('Absent','अनुपस्थित')}</div></div>
+        </div>
+        <div class="crd" onclick="goToTab('todo')" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between">
+          <div class="crd-n">✅ ${T('Pending Tasks','बाकी कार्य')}</div>
+          <div class="stat-v" style="font-size:22px;color:var(--acc)">${cache.todos.filter(t=>!t.done).length}</div>
+        </div>
+        ${isManager()?`<div class="crd" onclick="goToTab('pending')" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between">
+          <div class="crd-n">⏳ ${T('Pending Approvals','लंबित')}</div>
+          <div class="stat-v" style="font-size:22px;color:var(--blu)">${cache.leaves.filter(l=>l.status==='pending').length}</div>
+        </div>`:''}`;
+    } else {
+      // Worker: Show personal shift calendar
+      const yr = today.getFullYear(), mo = today.getMonth(), daysInMonth = new Date(yr,mo+1,0).getDate();
+      const shiftTypes = config.shifts || {};
+      let cal = '<div class="mo-grid">';
+      const dayLabels = LANG==='hi' ? ['र','सो','मं','बु','गु','शु','श'] : ['S','M','T','W','T','F','S'];
+      dayLabels.forEach(d => { cal += `<div class="mo-hdr">${d}</div>` });
+      const firstDay = new Date(yr, mo, 1).getDay();
+      for (let i=0; i<firstDay; i++) cal += '<div></div>';
+      for (let d=1; d<=daysInMonth; d++) {
+        const dk = dateKey(new Date(yr,mo,d));
+        const sv = cache.shifts[dk]?.[session.empId] || '';
+        const st = shiftTypes[sv] || {};
+        const isToday = d === today.getDate();
+        cal += `<div class="mo-cell" style="${isToday?'border:2px solid var(--acc);':''}background:${st.color?st.color+'12':'transparent'}">
+          <div class="day">${d}</div><div class="shift" style="color:${st.color||'var(--mt2)'}">${sv||'—'}</div>
+        </div>`;
+      }
+      cal += '</div>';
+      $('homeView').innerHTML = `
+        <div style="font-size:13px;font-weight:900;color:var(--tx2);margin-bottom:7px">${T('My Shift Calendar','मेरा शिफ्ट कैलेंडर')}</div>
+        <div class="crd">${cal}</div>
+        <div class="crd" onclick="goToTab('todo')" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between">
+          <div class="crd-n">✅ ${T('My Tasks','मेरे कार्य')}</div>
+          <div class="stat-v" style="font-size:22px;color:var(--acc)">${cache.todos.filter(t=>!t.done&&(!t.to||t.to===session.empId)).length}</div>
+        </div>`;
+    }
+  } catch(e) {
+    console.error('renderHome error:', e);
+    $('homeView').innerHTML = `<div class="empty"><div class="empty-i">👋</div><div class="empty-t">Welcome! Go to Schedule tab.</div></div>`;
+  }
+}
+
+// ═══════════════════════════════════════════
+// SCHEDULE TAB
+// ═══════════════════════════════════════════
+function setSchView(view) {
+  scheduleView = view;
+  $('viewWeek').className = 'chip' + (view==='week'?' on':'');
+  $('viewMonth').className = 'chip' + (view==='month'?' on':'');
+  renderSchedule();
+}
+function renderSchedule() {
+  try {
+    if (!weekStart) initWeekStart();
+    const shiftTypes = config.shifts || {};
+    const depts = config.depts || {};
+    const emps = getEmployees().filter(e => e.status !== 'left');
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+    // Set default month picker
+    const now = new Date();
+    const monthEl = $('xlMo');
+    if (monthEl && !monthEl.value) monthEl.value = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+
+    // Show/hide admin controls based on role
+    if (isWorker()) {
+      const upEl = $('schUpload'); if(upEl) upEl.style.display = 'none';
+      $('schActions').style.display = 'none';
+    } else {
+      const upEl = $('schUpload'); if(upEl) upEl.style.display = 'block';
+      $('schActions').style.display = 'flex';
+    }
+
+    // Week label
+    const ws = new Date(weekStart), we = new Date(ws);
+    we.setDate(ws.getDate() + 6);
+    $('schLabel').textContent = ws.getDate() + ' ' + months[ws.getMonth()] + ' — ' + we.getDate() + ' ' + months[we.getMonth()] + ' ' + we.getFullYear();
+
+    if (!emps.length) {
+      $('schTable').innerHTML = ''; $('schLegend').innerHTML = ''; $('schDeptFilter').innerHTML = '';
+      $('schMonthView').style.display = 'none';
+      return;
+    }
+
+    // Dept filter chips
+    $('schDeptFilter').innerHTML = `<div class="chip${deptFilter==='ALL'?' on':''}" onclick="deptFilter='ALL';renderSchedule();this.parentNode.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));this.classList.add('on')">${T('All','सभी')}</div>` +
+      Object.entries(depts).map(([k,d]) =>
+        `<div class="chip${deptFilter===k?' on':''}" onclick="deptFilter='${esc(k)}';renderSchedule();this.parentNode.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));this.classList.add('on')">${esc(d.name)}</div>`
+      ).join('');
+
+    const filtered = deptFilter === 'ALL' ? emps : emps.filter(e => e.dept === deptFilter);
+
+    if (scheduleView === 'month') {
+      $('schTable').style.display = 'none';
+      $('schMonthView').style.display = '';
+      renderMonthlySchedule(filtered, shiftTypes, depts);
+    } else {
+      $('schTable').style.display = '';
+      $('schMonthView').style.display = 'none';
+      renderWeeklySchedule(filtered, shiftTypes, depts);
+    }
+
+    // Legend
+    $('schLegend').innerHTML = Object.entries(shiftTypes).map(([code,s]) =>
+      `<div class="leg"><span class="shc" style="background:${esc(s.color)}18;color:${esc(s.color)}">${esc(code)}</span>${esc(s.label)}</div>`
+    ).join('');
+
+    // Auto-scheduler info
+    const nextMonth = new Date(now.getFullYear(), now.getMonth()+1, 1);
+    $('autoInfo').textContent = T('Analyzes patterns → generates ' + months[nextMonth.getMonth()] + ' ' + nextMonth.getFullYear(),
+      'पैटर्न → ' + months[nextMonth.getMonth()] + ' ' + nextMonth.getFullYear() + ' बनाएगा');
+  } catch(e) { console.error('renderSchedule error:', e) }
+}
+
+function renderWeeklySchedule(emps, shiftTypes, depts) {
+  const dayLabels = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const days = [];
+  for (let i=0; i<7; i++) {
+    const d = new Date(weekStart); d.setDate(weekStart.getDate() + i);
+    days.push({ date: d, key: dateKey(d), day: dayLabels[d.getDay()], num: d.getDate() });
+  }
+  const todayKey = dateKey(new Date());
+  let html = '<thead><tr><th style="text-align:left;min-width:95px">'+T('Employee','कर्मचारी')+'</th>';
+  days.forEach(d => {
+    const isToday = d.key === todayKey;
+    html += `<th style="${isToday?'color:var(--acc);font-weight:900;':''}">${d.day}<br>${d.num}</th>`;
+  });
+  html += '</tr></thead><tbody>';
+
+  // Group by dept
+  const groups = {};
+  emps.forEach(e => { const k = e.dept || 'OTHER'; if(!groups[k]) groups[k]=[]; groups[k].push(e) });
+
+  Object.entries(groups).forEach(([deptKey, deptEmps]) => {
+    const dept = depts[deptKey] || { name: deptKey, color: '#64748b' };
+    html += `<tr class="sec-r"><td colspan="${days.length+1}"><span class="sec-r-l" style="color:${esc(dept.color)}">${esc(dept.name)} (${deptEmps.length})</span></td></tr>`;
+    deptEmps.forEach(emp => {
+      html += `<tr><td class="e-nm">${esc(emp.name)}</td>`;
+      days.forEach(d => {
+        const shiftCode = cache.shifts[d.key]?.[emp.id] || '';
+        const st = shiftTypes[shiftCode] || {};
+        const clickHandler = canEditShift() ? `onclick="cycleShift('${esc(emp.id)}','${esc(d.key)}')"` : '';
+        html += `<td><div class="shc" style="background:${st.color?st.color+'18':'transparent'};color:${st.color||'var(--mt)'}" ${clickHandler}>${esc(shiftCode)||'—'}</div></td>`;
+      });
+      html += '</tr>';
+    });
+  });
+  html += '</tbody>';
+  $('schTable').innerHTML = html;
+}
+
+function renderMonthlySchedule(emps, shiftTypes, depts) {
+  const now = new Date();
+  const yr = now.getFullYear(), mo = now.getMonth();
+  const daysInMonth = new Date(yr, mo+1, 0).getDate();
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  
+  let html = `<div style="font-size:14px;font-weight:900;color:var(--txt);margin-bottom:10px">${months[mo]} ${yr} — ${T('Full Month View','पूरे महीने का दृश्य')}</div>`;
+  html += '<div style="overflow-x:auto"><table class="sch-t" style="min-width:' + (100 + daysInMonth * 30) + 'px"><thead><tr><th style="text-align:left;min-width:95px">' + T('Employee','कर्मचारी') + '</th>';
+  for (let d=1; d<=daysInMonth; d++) html += `<th>${d}</th>`;
+  html += '</tr></thead><tbody>';
+
+  const groups = {};
+  emps.forEach(e => { const k = e.dept || 'OTHER'; if(!groups[k]) groups[k]=[]; groups[k].push(e) });
+
+  Object.entries(groups).forEach(([deptKey, deptEmps]) => {
+    const dept = depts[deptKey] || { name: deptKey, color: '#64748b' };
+    html += `<tr class="sec-r"><td colspan="${daysInMonth+1}"><span class="sec-r-l" style="color:${esc(dept.color)}">${esc(dept.name)} (${deptEmps.length})</span></td></tr>`;
+    deptEmps.forEach(emp => {
+      html += `<tr><td class="e-nm">${esc(emp.name)}</td>`;
+      for (let d=1; d<=daysInMonth; d++) {
+        const dk = dateKey(new Date(yr, mo, d));
+        const sc = cache.shifts[dk]?.[emp.id] || '';
+        const st = shiftTypes[sc] || {};
+        const click = canEditShift() ? `onclick="cycleShift('${esc(emp.id)}','${esc(dk)}')"` : '';
+        html += `<td><div class="shc" style="background:${st.color?st.color+'18':'transparent'};color:${st.color||'var(--mt)'};width:22px;height:20px;font-size:8px" ${click}>${esc(sc)||'—'}</div></td>`;
+      }
+      html += '</tr>';
+    });
+  });
+  html += '</tbody></table></div>';
+  $('schMonthView').innerHTML = html;
+}
+
+// ─── SHIFT CYCLE (with WhatsApp Queue + Audit) ───
+async function cycleShift(empId, dk) {
+  const codes = Object.keys(config.shifts || {});
+  if (!codes.length) return;
+  const current = cache.shifts[dk]?.[empId] || '';
+  const idx = codes.indexOf(current);
+  const next = codes[(idx + 1) % codes.length];
+  
+  try {
+    await mgrSet('shifts/' + dk + '/' + empId, next);
+    
+    const emp = getEmployees().find(e => e.id === empId);
+    const oldLabel = config.shifts[current]?.label || current || 'None';
+    const newLabel = config.shifts[next]?.label || next;
+    const fmtDate = new Date(dk).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' });
+
+    // In-app notification
+    if (emp) {
+      pushNotification(emp.id, T('Shift Changed','शिफ्ट बदली'), fmtDate + ': ' + oldLabel + ' → ' + newLabel, '🔄', 'shift');
+    }
+
+    // Add to WhatsApp queue (NOT auto-open)
+    if (emp && emp.phone && emp.phone.length >= 10) {
+      const msg = `📋 *Shift Changed*\n👤 ${emp.name} (${emp.empId || ''})\n📅 ${fmtDate}\n🔄 ${oldLabel} → *${newLabel}*\n👨‍💼 Changed by: ${session.name}\n— Man Power · mp.vkstech.com`;
+      addToWhatsAppQueue(emp.phone, msg, emp.name);
+    }
+
+    // Audit trail
+    logAudit('shift_change', `${emp?.name || empId}: ${oldLabel} → ${newLabel} on ${fmtDate}`);
+  } catch(e) { toast('Error: ' + e.message) }
+}
+
+// ─── EXPORT SCHEDULE ───
+function exportSchedule() {
+  try {
+    const emps = getEmployees().filter(e => e.status !== 'left');
+    if (!emps.length) { toast(T('No employees','कोई कर्मचारी नहीं')); return }
+    const now = new Date();
+    const yr = now.getFullYear(), mo = now.getMonth();
+    const daysInMonth = new Date(yr, mo+1, 0).getDate();
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+    const data = [['Name', 'Code', 'Dept', 'Phone', ...Array.from({length:daysInMonth},(_, i)=>i+1)]];
+    emps.forEach(emp => {
+      const row = [emp.name, emp.empId||'', emp.dept||'', emp.phone||''];
+      for (let d=1; d<=daysInMonth; d++) {
+        const dk = dateKey(new Date(yr, mo, d));
+        row.push(cache.shifts[dk]?.[emp.id] || '');
+      }
+      data.push(row);
+    });
+
+    const ws = XLSX.utils.aoa_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, months[mo] + ' ' + yr);
+    XLSX.writeFile(wb, 'ManPower_' + months[mo] + '_' + yr + '.xlsx');
+    toast('✅ ' + T('Exported!','डाउनलोड हो गया!'));
+    logAudit('export_schedule', months[mo] + ' ' + yr);
+  } catch(e) { toast('Error: ' + e.message) }
+}
+
+// ═══════════════════════════════════════════
+// AUTO SCHEDULER
+// ═══════════════════════════════════════════
+function openAutoScheduler() { $('autoBox').style.display = ''; $('autoBox').scrollIntoView({behavior:'smooth'}) }
+async function runAutoScheduler() {
+  const emps = getEmployees().filter(e => e.status !== 'left');
+  const shiftCodes = Object.keys(config.shifts || {});
+  if (!emps.length || !shiftCodes.length) { toast('No data'); return }
+  
+  const now = new Date();
+  const curYear = now.getFullYear(), curMonth = now.getMonth();
+  const daysInCurMonth = new Date(curYear, curMonth+1, 0).getDate();
+  const nextDate = new Date(curYear, curMonth+1, 1);
+  const nextYear = nextDate.getFullYear(), nextMonth = nextDate.getMonth();
+  const daysInNextMonth = new Date(nextYear, nextMonth+1, 0).getDate();
+
+  toast(T('🤖 Analyzing patterns...','🤖 पैटर्न विश्लेषण...'));
+
+  // BATCHED update object
+  const batchUpdates = {};
+
+  for (const emp of emps) {
+    // Gather current month pattern
+    const pattern = [];
+    for (let d=1; d<=daysInCurMonth; d++) {
+      pattern.push(cache.shifts[dateKey(new Date(curYear, curMonth, d))]?.[emp.id] || '');
+    }
+    // Detect cycle length
+    let bestCycle = 7, bestScore = 0;
+    for (const tryLen of [7, 14, 21, 6, 5]) {
+      if (pattern.length < tryLen * 2) continue;
+      let matches = 0, total = 0;
+      for (let i = tryLen; i < pattern.length; i++) {
+        if (pattern[i] && pattern[i-tryLen]) { total++; if (pattern[i] === pattern[i-tryLen]) matches++ }
+      }
+      const score = total ? matches / total : 0;
+      if (score > bestScore) { bestScore = score; bestCycle = tryLen }
+    }
+    // Generate next month
+    for (let d=1; d<=daysInNextMonth; d++) {
+      const dk = dateKey(new Date(nextYear, nextMonth, d));
+      const srcIdx = (d-1) % bestCycle;
+      let shift = '';
+      for (let lb = daysInCurMonth; lb >= 1; lb--) {
+        if ((lb-1) % bestCycle === srcIdx) {
+          shift = cache.shifts[dateKey(new Date(curYear, curMonth, lb))]?.[emp.id] || '';
+          if (shift) break;
+        }
+      }
+      if (!shift) {
+        const counts = {};
+        pattern.filter(Boolean).forEach(s => { counts[s] = (counts[s]||0) + 1 });
+        shift = Object.entries(counts).sort((a,b) => b[1]-a[1])[0]?.[0] || shiftCodes[0] || 'D';
+      }
+      // Add to batch
+      if (!batchUpdates[dk]) batchUpdates[dk] = {};
+      batchUpdates[dk][emp.id] = shift;
+    }
+  }
+  // SINGLE batched write per date
+  try {
+    for (const [dk, empShifts] of Object.entries(batchUpdates)) {
+      await mgrUpdate('shifts/' + dk, empShifts);
+    }
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    toast('✅ ' + months[nextMonth] + ' ' + nextYear + ' generated!');
+    logAudit('auto_schedule', months[nextMonth] + ' ' + nextYear);
+    weekStart = new Date(nextYear, nextMonth, 1);
+    weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+    renderSchedule();
+  } catch(e) { toast('Error: ' + e.message) }
+}
+
+// ═══════════════════════════════════════════
+// LEAVES
+// ═══════════════════════════════════════════
+function setLeaveFilter(f, el) { leaveFilter=f; el.parentNode.querySelectorAll('.chip').forEach(c=>c.classList.remove('on')); el.classList.add('on'); renderLeaves() }
+function renderLeaves() {
+  let list = cache.leaves;
+  if (isWorker()) list = list.filter(l => l.eid === session.empId);
+  if (leaveFilter !== 'all') list = list.filter(l => l.status === leaveFilter);
+  list.sort((a,b) => (b.at||'').localeCompare(a.at||''));
+  const el = $('leaveList');
+  if (!list.length) { el.innerHTML = `<div class="empty"><div class="empty-i">🏖️</div><div class="empty-t">${T('No leaves','कोई छुट्टी नहीं')}</div></div>`; return }
+  const statusColors = { pending:'var(--acc)', approved:'var(--grn)', rejected:'var(--red)' };
+  el.innerHTML = list.map(l =>
+    `<div class="crd">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+        <div class="crd-n">${esc(l.name||l.eid)}</div>
+        <span style="font-size:11px;font-weight:800;color:${statusColors[l.status]||'var(--mt)'}">${(l.status||'').toUpperCase()}</span>
+      </div>
+      <div class="crd-s">${esc(l.type||'')} · ${esc(l.from)} → ${esc(l.to)} · ${esc(l.reason||'')}</div>
+      ${isManager()&&l.status==='pending'?`<div style="display:flex;gap:5px;margin-top:7px">
+        <button class="btn-a" style="flex:1;padding:7px" onclick="approveLeave('${esc(l._key)}')">✅ Approve</button>
+        <button class="btn-s" style="flex:1;padding:7px;color:var(--red);border-color:rgba(220,38,38,.2)" onclick="rejectLeave('${esc(l._key)}')">❌ Reject</button>
+      </div>`:''}
+    </div>`
+  ).join('');
+}
+function openLeaveForm() {
+  openModal(`<div class="m-handle"></div><div class="m-title">${T('New Leave','नया अवकाश')}</div>
+    <div class="fld"><label>Type</label><select id="lvType"><option value="CL">Casual</option><option value="SL">Sick</option><option value="EL">Earned</option></select></div>
+    <div class="fld"><label>From</label><input type="date" id="lvFrom"></div>
+    <div class="fld"><label>To</label><input type="date" id="lvTo"></div>
+    <div class="fld"><label>Reason</label><textarea id="lvReason"></textarea></div>
+    <button class="btn-p" onclick="submitLeave()">Submit</button>
+    <button class="btn-s" onclick="closeModal()" style="width:100%;margin-top:7px">Cancel</button>`);
+}
+async function submitLeave() {
+  const from = $('lvFrom').value, to = $('lvTo').value;
+  if (!from || !to) { toast('Select dates'); return }
+  if (new Date(from) > new Date(to)) { toast(T('From must be before To','शुरू तारीख पहले हो')); return }
+  try {
+    await mgrPush('leaves', { eid: session.empId||session.phone, name: session.name, type: $('lvType').value, from, to, reason: $('lvReason').value.trim(), status:'pending', at: new Date().toISOString() });
+    closeModal(); toast('✅');
+    logAudit('leave_request', session.name + ': ' + $('lvType').value + ' ' + from + ' → ' + to);
+  } catch(e) { toast('Error: ' + e.message) }
+}
+async function approveLeave(key) {
+  try {
+    await mgrUpdate('leaves/' + key, { status:'approved', by: session.name, approvedAt: new Date().toISOString() });
+    const lv = cache.leaves.find(l => l._key === key);
+    if (lv) {
+      pushNotification(lv.eid||lv.empId||'', T('Leave Approved ✅','छुट्टी मंजूर ✅'), lv.type+' · '+lv.from+' → '+lv.to, '✅', 'leave_approved');
+      // WhatsApp notification for leave approval
+      const emp = getEmployees().find(e => e.id === (lv.eid||lv.empId));
+      if (emp?.phone) {
+        const msg = `✅ *Leave Approved*\n👤 ${emp.name}\n📅 ${lv.from} → ${lv.to}\n📋 ${lv.type}\n👨‍💼 Approved by: ${session.name}\n— Man Power`;
+        addToWhatsAppQueue(emp.phone, msg, emp.name);
+      }
+    }
+    logAudit('leave_approve', lv?.name + ': ' + lv?.type);
+    toast('✅');
+  } catch(e) { toast('Error') }
+}
+async function rejectLeave(key) {
+  try {
+    await mgrUpdate('leaves/' + key, { status:'rejected', by: session.name, rejectedAt: new Date().toISOString() });
+    const lv = cache.leaves.find(l => l._key === key);
+    if (lv) pushNotification(lv.eid||lv.empId||'', T('Leave Rejected ❌','छुट्टी अस्वीकार ❌'), lv.type+' · '+lv.from+' → '+lv.to, '❌', 'leave_rejected');
+    logAudit('leave_reject', lv?.name + ': ' + lv?.type);
+    toast('❌');
+  } catch(e) { toast('Error') }
+}
+function openResignForm() {
+  openModal(`<div class="m-handle"></div><div class="m-title">${T('Resignation','इस्तीफ़ा')}</div>
+    <div class="fld"><label>Reason</label><textarea id="resReason"></textarea></div>
+    <div class="fld"><label>Last Day</label><input type="date" id="resDate"></div>
+    <button class="btn-p" style="background:linear-gradient(135deg,var(--red),#991b1b)" onclick="submitResign()">Submit</button>
+    <button class="btn-s" onclick="closeModal()" style="width:100%;margin-top:7px">Cancel</button>`);
+}
+async function submitResign() {
+  try {
+    await mgrPush('leaves', { eid: session.empId||session.phone, name: session.name, type:'Resignation', from:$('resDate').value, to:$('resDate').value, reason:$('resReason').value.trim(), status:'pending', at: new Date().toISOString() });
+    closeModal(); toast('✅'); logAudit('resignation', session.name);
+  } catch(e) { toast('Error') }
+}
+
+// ═══════════════════════════════════════════
+// REPORTS
+// ═══════════════════════════════════════════
+function setReportFilter(f,el){reportFilter=f;el.parentNode.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));el.classList.add('on');renderReports()}
+function renderReports() {
+  let list = cache.reports;
+  if (isWorker()) list = list.filter(r => r.eid === session.empId || r.by === session.name);
+  if (reportFilter !== 'all') list = list.filter(r => r.type === reportFilter);
+  list.sort((a,b) => (b.at||'').localeCompare(a.at||''));
+  const el = $('reportList');
+  if (!list.length) { el.innerHTML = `<div class="empty"><div class="empty-i">📋</div><div class="empty-t">${T('No reports','कोई रिपोर्ट नहीं')}</div></div>`; return }
+  const typeColors = {ncr:'var(--acc)',absent:'var(--red)',warning:'var(--prp)',appreciation:'var(--grn)'};
+  const typeIcons = {ncr:'⚠️',absent:'📵',warning:'⚡',appreciation:'🌟'};
+  el.innerHTML = list.map(r =>
+    `<div class="crd">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
+        <span>${typeIcons[r.type]||'📋'}</span>
+        <div class="crd-n" style="color:${typeColors[r.type]||'var(--txt)'}">${esc(r.type||'').toUpperCase()}</div>
+        <div style="margin-left:auto;font-size:9px;color:var(--mt);font-weight:600">${r.at?new Date(r.at).toLocaleDateString():''}</div>
+      </div>
+      <div class="crd-s">${esc(r.empName||'')} · ${esc(r.desc||'')}</div>
+      ${r.by?`<div style="font-size:10px;color:var(--mt);margin-top:3px;font-weight:600">By: ${esc(r.by)}</div>`:''}
+    </div>`
+  ).join('');
+}
+function openReportForm() {
+  const emps = getEmployees();
+  openModal(`<div class="m-handle"></div><div class="m-title">${T('New Report','नई रिपोर्ट')}</div>
+    <div class="fld"><label>Type</label><select id="rpType"><option value="ncr">⚠️ NCR</option><option value="absent">📵 Absent</option><option value="warning">⚡ Warning</option><option value="appreciation">🌟 Appreciation</option></select></div>
+    ${canEditShift()?`<div class="fld"><label>Employee</label><select id="rpEmp"><option value="">Select...</option>${emps.map(e=>`<option value="${esc(e.id)}">${esc(e.name)}</option>`).join('')}</select></div>`:''}
+    <div class="fld"><label>Description</label><textarea id="rpDesc"></textarea></div>
+    <button class="btn-p" onclick="submitReport()">Submit</button>
+    <button class="btn-s" onclick="closeModal()" style="width:100%;margin-top:7px">Cancel</button>`);
+}
+async function submitReport() {
+  const desc = $('rpDesc').value.trim();
+  if (!desc) { toast('Enter description'); return }
+  const empEl = $('rpEmp'), eid = empEl ? empEl.value : (session.empId||'');
+  const emp = getEmployees().find(e => e.id === eid);
+  try {
+    await mgrPush('reports', { type: $('rpType').value, desc, eid, empName: emp?.name||session.name, by: session.name, at: new Date().toISOString() });
+    closeModal(); toast('✅');
+    logAudit('report_create', $('rpType').value + ': ' + (emp?.name||session.name));
+  } catch(e) { toast('Error') }
+}
+
+// ═══════════════════════════════════════════
+// TODOS
+// ═══════════════════════════════════════════
+function setTodoFilter(f,el){todoFilter=f;el.parentNode.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));el.classList.add('on');renderTodos()}
+function renderTodos() {
+  let list = cache.todos;
+  if (isWorker()) list = list.filter(t => !t.to || t.to === session.empId);
+  if (todoFilter === 'pending') list = list.filter(t => !t.done);
+  else if (todoFilter === 'done') list = list.filter(t => t.done);
+  list.sort((a,b) => (a.done?1:0) - (b.done?1:0) || (b.at||'').localeCompare(a.at||''));
+  $('tdTotal').textContent = cache.todos.length;
+  $('tdPending').textContent = cache.todos.filter(t => !t.done).length;
+  $('tdDone').textContent = cache.todos.filter(t => t.done).length;
+  const el = $('todoList');
+  if (!list.length) { el.innerHTML = `<div class="empty"><div class="empty-i">✅</div><div class="empty-t">${T('No tasks','कोई कार्य नहीं')}</div></div>`; return }
+  const priorityColors = { high:'var(--red)', medium:'var(--acc)', low:'var(--grn)' };
+  el.innerHTML = list.map(t =>
+    `<div class="crd" style="display:flex;gap:10px;align-items:flex-start">
+      <div onclick="toggleTodo('${esc(t._key)}',${!t.done})" style="width:20px;height:20px;border-radius:5px;border:2px solid ${t.done?'var(--grn)':'var(--brd2)'};${t.done?'background:var(--grn);':''}flex-shrink:0;margin-top:2px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px">${t.done?'✓':''}</div>
+      <div style="flex:1">
+        <div class="crd-n" style="${t.done?'text-decoration:line-through;opacity:.4':''}">${esc(t.title)}</div>
+        ${t.desc?`<div class="crd-s">${esc(t.desc)}</div>`:''}
+        ${t.priority?`<span style="font-size:9px;font-weight:800;padding:2px 6px;border-radius:4px;background:${(priorityColors[t.priority]||'var(--acc)')+'10'};color:${priorityColors[t.priority]||'var(--acc)'};margin-top:3px;display:inline-block">${t.priority.toUpperCase()}</span>`:''}
+      </div>
+    </div>`
+  ).join('');
+}
+async function toggleTodo(key, done) {
+  try { await mgrUpdate('todos/' + key, { done, doneAt: done ? new Date().toISOString() : null }) } catch(e) { toast('Error') }
+}
+function openTodoForm() {
+  openModal(`<div class="m-handle"></div><div class="m-title">${T('New Task','नया कार्य')}</div>
+    <div class="fld"><label>Title</label><input id="tdTitle"></div>
+    <div class="fld"><label>Description</label><textarea id="tdDesc"></textarea></div>
+    <div class="fld"><label>Priority</label><select id="tdPriority"><option value="medium">🟡 Normal</option><option value="high">🔴 Urgent</option><option value="low">🟢 Low</option></select></div>
+    <div class="fld"><label>Due</label><input type="date" id="tdDue"></div>
+    <button class="btn-p" onclick="submitTodo()">Add Task</button>
+    <button class="btn-s" onclick="closeModal()" style="width:100%;margin-top:7px">Cancel</button>`);
+}
+async function submitTodo() {
+  const title = $('tdTitle').value.trim();
+  if (!title) { toast('Enter title'); return }
+  try {
+    await mgrPush('todos', { title, desc: $('tdDesc').value.trim(), priority: $('tdPriority').value, due: $('tdDue').value, done: false, by: session.name, at: new Date().toISOString() });
+    closeModal(); toast('✅');
+  } catch(e) { toast('Error') }
+}
+
+// ═══════════════════════════════════════════
+// PENDING APPROVALS
+// ═══════════════════════════════════════════
+function renderPending() {
+  if (!isManager()) return;
+  const pending = cache.leaves.filter(l => l.status === 'pending');
+  $('pendLeaves').innerHTML = pending.length ? pending.map(l =>
+    `<div class="crd">
+      <div class="crd-n">${esc(l.name||l.eid)}</div>
+      <div class="crd-s">${esc(l.type)} · ${esc(l.from)} → ${esc(l.to)}</div>
+      <div style="display:flex;gap:5px;margin-top:7px">
+        <button class="btn-a" style="flex:1;padding:7px" onclick="approveLeave('${esc(l._key)}')">✅ Approve</button>
+        <button class="btn-s" style="flex:1;padding:7px;color:var(--red);border-color:rgba(220,38,38,.2)" onclick="rejectLeave('${esc(l._key)}')">❌ Reject</button>
+      </div>
+    </div>`
+  ).join('') : `<div style="color:var(--mt);font-size:12px;padding:10px;font-weight:600">${T('Nothing pending','कुछ लंबित नहीं')}</div>`;
+}
+
+// ═══════════════════════════════════════════
+// TEAM
+// ═══════════════════════════════════════════
+function renderTeam(searchQuery) {
+  const depts = config.depts || {};
+  const emps = getEmployees().filter(e => e.status !== 'left');
+  let filtered = deptFilter === 'ALL' ? emps : emps.filter(e => e.dept === deptFilter);
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase();
+    filtered = filtered.filter(e => (e.name||'').toLowerCase().includes(q) || (e.empId||'').toLowerCase().includes(q));
+  }
+  if (canAddRemove()) $('teamActions').style.display = '';
+  $('teamDeptFilter').innerHTML = `<div class="chip${deptFilter==='ALL'?' on':''}" onclick="deptFilter='ALL';renderTeam();this.parentNode.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));this.classList.add('on')">${T('All','सभी')}</div>` +
+    Object.entries(depts).map(([k,d]) => `<div class="chip${deptFilter===k?' on':''}" onclick="deptFilter='${esc(k)}';renderTeam();this.parentNode.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));this.classList.add('on')">${esc(d.name)}</div>`).join('');
+
+  const el = $('teamList');
+  if (!filtered.length) { el.innerHTML = `<div class="empty"><div class="empty-i">👥</div><div class="empty-t">${T('No members','कोई सदस्य नहीं')}</div></div>`; return }
+  el.innerHTML = filtered.map(e => {
+    const dept = depts[e.dept] || {};
+    const tlBadge = e.isTeamLead ? `<span style="font-size:8px;font-weight:800;padding:2px 6px;border-radius:4px;background:var(--accBg);color:var(--acc);margin-left:4px">TEAM LEAD</span>` : '';
+    return `<div class="crd" ${canEditShift()?`onclick="openEditEmployee('${esc(e.id)}')" style="cursor:pointer"`:''} style="display:flex;align-items:center;gap:10px">
+      <div class="u-av" style="background:${esc(dept.color||'var(--acc)')}">${(e.name||'?').charAt(0)}</div>
+      <div style="flex:1"><div class="crd-n">${esc(e.name)}${tlBadge}</div><div class="crd-s">${esc(e.empId)}${e.phone?' · 📱'+esc(e.phone):''}${dept.name?' · '+esc(dept.name):''}</div></div>
+    </div>`;
+  }).join('');
+}
+function openAddEmployee() {
+  const depts = config.depts || {};
+  openModal(`<div class="m-handle"></div><div class="m-title">${T('Add Employee','कर्मचारी जोड़ें')}</div>
+    <div class="fld"><label>Name</label><input id="aeNm"></div>
+    <div class="fld"><label>Employee Code</label><input id="aeCd" autocapitalize="characters"></div>
+    <div class="fld"><label>Mobile (10 digit)</label><input id="aePh" type="tel" maxlength="10" oninput="this.value=this.value.replace(/\\D/g,'')"></div>
+    <div class="fld"><label>Department</label><select id="aeDp">${Object.entries(depts).map(([k,d])=>`<option value="${esc(k)}">${esc(d.name)}</option>`).join('')}</select></div>
+    <div class="fld"><label>Designation</label><input id="aeDe"></div>
+    <div class="fld"><label>Salary</label><input id="aeSl" type="number"></div>
+    <button class="btn-p" onclick="submitAddEmployee()">Add</button>
+    <button class="btn-s" onclick="closeModal()" style="width:100%;margin-top:7px">Cancel</button>`);
+}
+async function submitAddEmployee() {
+  const name = $('aeNm').value.trim(), code = $('aeCd').value.trim().toUpperCase(), phone = $('aePh').value.trim();
+  if (!name || !code) { toast('Name & Code required'); return }
+  try {
+    const id = 'e_' + Date.now();
+    await mgrSet('employees/' + id, { id, name, empId: code, phone, dept: $('aeDp').value, designation: $('aeDe').value.trim(), salary: parseInt($('aeSl').value)||0, status:'active', createdAt: new Date().toISOString() });
+    if (phone.length === 10) await fbSet('wkrIdx/' + phone, { managerId: session.managerId, empId: id });
+    closeModal(); toast('✅');
+    logAudit('employee_add', name + ' (' + code + ')');
+  } catch(e) { toast('Error: ' + e.message) }
+}
+function openEditEmployee(id) {
+  const emp = getEmployees().find(e => e.id === id);
+  if (!emp) return;
+  const depts = config.depts || {};
+  if (isManager()) {
+    const tlBtn = emp.isTeamLead
+      ? `<button class="btn-s" onclick="toggleTeamLead('${esc(id)}',false)" style="width:100%;margin-top:7px;color:var(--acc);border-color:rgba(194,65,12,.2)">⬇️ Remove Team Lead</button>`
+      : `<button class="btn-s" onclick="toggleTeamLead('${esc(id)}',true)" style="width:100%;margin-top:7px;color:var(--grn);border-color:rgba(21,128,61,.2)">⭐ Make Team Lead</button>`;
+    openModal(`<div class="m-handle"></div><div class="m-title">${T('Edit Employee','कर्मचारी संपादन')}</div>
+      ${emp.isTeamLead?'<div style="padding:6px 10px;background:var(--accBg);border:1px solid rgba(194,65,12,.2);border-radius:8px;margin-bottom:10px;font-size:11px;font-weight:700;color:var(--acc)">⭐ Team Lead</div>':''}
+      <div class="fld"><label>Name</label><input id="eeNm" value="${esc(emp.name||'')}"></div>
+      <div class="fld"><label>Mobile</label><input id="eePh" value="${esc(emp.phone||'')}" type="tel"></div>
+      <div class="fld"><label>Dept</label><select id="eeDp">${Object.entries(depts).map(([k,d])=>`<option value="${esc(k)}"${emp.dept===k?' selected':''}>${esc(d.name)}</option>`).join('')}</select></div>
+      <div class="fld"><label>Designation</label><input id="eeDe" value="${esc(emp.designation||'')}"></div>
+      <div class="fld"><label>Salary</label><input id="eeSl" value="${emp.salary||0}" type="number"></div>
+      <button class="btn-p" onclick="submitEditEmployee('${esc(id)}')">Save</button>
+      ${tlBtn}
+      <button class="btn-s" onclick="markEmployeeLeft('${esc(id)}')" style="width:100%;margin-top:7px;color:var(--red);border-color:rgba(220,38,38,.2)">🚪 Mark as Left</button>
+      <button class="btn-s" onclick="closeModal()" style="width:100%;margin-top:7px">Cancel</button>`);
+  } else {
+    const dept = depts[emp.dept] || {};
+    openModal(`<div class="m-handle"></div><div class="m-title">👤 ${esc(emp.name)}</div>
+      <div style="padding:10px;background:var(--crd2);border-radius:10px;margin-bottom:10px">
+        <div style="font-size:13px;color:var(--tx2);line-height:1.8;font-weight:600">
+          📋 Code: <b>${esc(emp.empId)}</b><br>📱 Mobile: <b>${esc(emp.phone||'—')}</b><br>
+          🏢 Dept: <b>${esc(dept.name||emp.dept||'—')}</b><br>💼 Role: <b>${esc(emp.designation||'—')}</b>
+          ${emp.isTeamLead?'<br>⭐ <b style="color:var(--acc)">Team Lead</b>':''}
+        </div>
+      </div>
+      <button class="btn-s" onclick="closeModal()" style="width:100%">Close</button>`);
+  }
+}
+async function toggleTeamLead(id, val) {
+  try {
+    await mgrUpdate('employees/' + id, { isTeamLead: val || null });
+    closeModal(); toast(val ? '⭐ Team Lead assigned' : '✅ Team Lead removed');
+    logAudit(val?'teamlead_assign':'teamlead_remove', getEmployees().find(e=>e.id===id)?.name || id);
+  } catch(e) { toast('Error: ' + e.message) }
+}
+async function submitEditEmployee(id) {
+  try {
+    const phone = $('eePh').value.trim();
+    await mgrUpdate('employees/' + id, { name: $('eeNm').value.trim(), phone, dept: $('eeDp').value, designation: $('eeDe').value.trim(), salary: parseInt($('eeSl').value)||0 });
+    if (phone.length === 10) await fbSet('wkrIdx/' + phone, { managerId: session.managerId, empId: id });
+    closeModal(); toast('✅');
+    logAudit('employee_edit', $('eeNm').value.trim());
+  } catch(e) { toast('Error') }
+}
+async function markEmployeeLeft(id) {
+  if (!confirm(T('Mark as left?','छोड़ दिया?'))) return;
+  try {
+    await mgrUpdate('employees/' + id, { status:'left', leftAt: new Date().toISOString() });
+    closeModal(); toast('✅');
+    logAudit('employee_left', getEmployees().find(e=>e.id===id)?.name || id);
+  } catch(e) { toast('Error') }
+}
+
+// ═══════════════════════════════════════════
+// EXCEL UPLOAD (with progress + batch writes)
+// ═══════════════════════════════════════════
+function openExcelUpload() { goToTab('schedule') }
+async function previewExcel(input) {
+  const file = input.files[0]; if (!file) return;
+  const previewEl = $('xlPreview');
+  previewEl.innerHTML = `<div style="padding:12px;background:var(--bluBg);border-radius:8px;font-size:12px;color:var(--blu);font-weight:700">⏳ Reading ${esc(file.name)} (${Math.round(file.size/1024)}KB)...</div>`;
+  previewEl.style.display = '';
+
+  try {
+    const data = await file.arrayBuffer();
+    const workbook = XLSX.read(data, { cellDates: false });
+    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+    const allRows = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '', raw: true });
+    if (allRows.length < 4) { toast(T('File too small','फ़ाइल छोटी')); return }
+    const sheetName = workbook.SheetNames[0] || '';
+
+    // Detect month from sheet name + rows (pick LAST month found for ranges like "Aug 2025 to Feb 2026")
+    const monthNames = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+    let detectedMonth = null, detectedYear = null;
+    
+    // Helper: scan text for ALL month references, return the last one found
+    function findLastMonth(text) {
+      const lower = text.toLowerCase();
+      let lastMo = null, lastYr = null, lastPos = -1;
+      for (let i=0; i<12; i++) {
+        let pos = -1, searchFrom = 0;
+        // Find ALL occurrences of this month name, keep the last position
+        while ((pos = lower.indexOf(monthNames[i], searchFrom)) !== -1) {
+          if (pos > lastPos) {
+            lastPos = pos; lastMo = i;
+            // Look for a year near this month mention
+            const nearby = text.substring(Math.max(0, pos-10), pos+20);
+            const ym = nearby.match(/20\d{2}/);
+            lastYr = ym ? parseInt(ym[0]) : new Date().getFullYear();
+          }
+          searchFrom = pos + 1;
+        }
+      }
+      return lastMo !== null ? { month: lastMo, year: lastYr } : null;
+    }
+    
+    // Check sheet name first (most reliable for range formats)
+    const sheetMonthResult = findLastMonth(sheetName);
+    if (sheetMonthResult) { detectedMonth = sheetMonthResult.month; detectedYear = sheetMonthResult.year; }
+    
+    // If not found in sheet name, check first 3 rows
+    if (detectedMonth === null) {
+      for (let r=0; r<Math.min(3, allRows.length); r++) {
+        const rowResult = findLastMonth(allRows[r].join(' '));
+        if (rowResult) { detectedMonth = rowResult.month; detectedYear = rowResult.year; break; }
+      }
+    }
+    if (detectedMonth !== null) $('xlMo').value = (detectedYear||new Date().getFullYear()) + '-' + String(detectedMonth+1).padStart(2,'0');
+
+    // Find header row
+    let headerIdx = -1;
+    for (let r=0; r<Math.min(5, allRows.length); r++) {
+      const rowStr = allRows[r].map(c => String(c).toLowerCase());
+      if (rowStr.includes('name') || rowStr.some(c => c.includes('name'))) { headerIdx = r; break }
+    }
+    if (headerIdx === -1) {
+      for (let r=0; r<Math.min(5, allRows.length); r++) {
+        const nums = allRows[r].filter(c => { const n = parseInt(c); return n>=1 && n<=31 });
+        if (nums.length >= 10) { headerIdx = r; break }
+      }
+    }
+    if (headerIdx === -1) { toast(T('Cannot find headers','हेडर नहीं मिले')); return }
+
+    const headers = allRows[headerIdx].map(c => String(c||'').trim());
+    const dataRows = allRows.slice(headerIdx+1).filter(r => r.some(c => c!=='' && c!==null && c!==undefined));
+
+    // Identify columns
+    const colMap = { name:-1, desig:-1, dept:-1, code:-1, mobile:-1, woff:-1, sno:-1 };
+    const dateCols = [];
+    headers.forEach((h, i) => {
+      const hl = h.toLowerCase().trim();
+      // Skip empty headers
+      if (!hl) return;
+      // Explicit column matching (order matters: most specific first)
+      if (hl.match(/^s\.?\s*no|^sl\.?\s*no|^serial|^#$|^sr\.?\s*no/)) { colMap.sno = i; return }
+      if ((hl.includes('name') || hl === 'employee name') && colMap.name < 0) { colMap.name = i; return }
+      if (hl.includes('desig') || hl.includes('position') || hl.includes('role')) { colMap.desig = i; return }
+      if (hl.includes('dept') || hl.includes('department') || hl.includes('section') || hl.includes('team')) { colMap.dept = i; return }
+      if (hl.includes('code') || hl.match(/^emp/) || hl === 'id' || hl === 'emp id') { colMap.code = i; return }
+      if (hl.includes('mobile') || hl.includes('phone') || hl.includes('contact') || hl.includes('cell')) { colMap.mobile = i; return }
+      if (hl.includes('w-off') || hl.includes('woff') || hl.includes('weekly') || hl.includes('week off')) { colMap.woff = i; return }
+      // Check if it's a day number (1-31)
+      const n = parseInt(hl);
+      if (!isNaN(n) && n >= 1 && n <= 31) dateCols.push({ idx: i, day: n });
+    });
+    dateCols.sort((a,b) => a.day - b.day);
+    if (colMap.name < 0) { toast(T('No "Name" column','नाम कॉलम नहीं')); return }
+
+    // Preview
+    const preview = dataRows.slice(0,4);
+    previewEl.innerHTML = `
+      <div style="font-size:12px;font-weight:800;color:var(--grn);margin-bottom:6px">✅ ${T('File loaded!','फ़ाइल लोड!')}</div>
+      <div style="font-size:11px;color:var(--tx2);margin-bottom:6px;font-weight:600;line-height:1.6">
+        📄 <b>${esc(file.name)}</b> · Sheet: "${esc(sheetName)}"<br>
+        👤 <b>${dataRows.length}</b> ${T('employees','कर्मचारी')} · 📅 <b>${dateCols.length}</b> ${T('days','दिन')}
+        ${detectedMonth!==null?' · 🗓️ <b>'+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][detectedMonth]+' '+(detectedYear||'')+'</b>':''}
+      </div>
+      <div style="overflow-x:auto;border:1px solid var(--brd);border-radius:8px">
+        <table style="width:100%;border-collapse:collapse;font-size:10px">
+          <thead><tr style="background:var(--crd2)">
+            <th style="padding:5px 6px;text-align:left;border-bottom:1px solid var(--brd)">Name</th>
+            <th style="padding:5px 6px;text-align:left;border-bottom:1px solid var(--brd)">Code</th>
+            ${dateCols.slice(0,8).map(d => `<th style="padding:5px 4px;text-align:center;border-bottom:1px solid var(--brd)">${d.day}</th>`).join('')}
+            ${dateCols.length>8?'<th style="padding:5px">...</th>':''}
+          </tr></thead>
+          <tbody>${preview.map(r => `<tr>
+            <td style="padding:4px 6px;border-bottom:1px solid var(--brd);font-weight:700">${esc(String(r[colMap.name]||''))}</td>
+            <td style="padding:4px 6px;border-bottom:1px solid var(--brd)">${esc(String(r[colMap.code>=0?colMap.code:0]||''))}</td>
+            ${dateCols.slice(0,8).map(d => `<td style="padding:4px;text-align:center;border-bottom:1px solid var(--brd);color:var(--acc);font-weight:800">${esc(String(r[d.idx]||'—'))}</td>`).join('')}
+            ${dateCols.length>8?'<td>...</td>':''}
+          </tr>`).join('')}</tbody>
+        </table>
+      </div>`;
+    $('xlBtn').style.display = '';
+    window._excelData = { dataRows, colMap, dateCols, sheetName };
+  } catch(e) {
+    console.error('Excel error:', e);
+    previewEl.innerHTML = `<div style="padding:12px;background:var(--redBg);border-radius:8px;font-size:12px;color:var(--red);font-weight:700">❌ Error: ${esc(e.message)}</div>`;
+    previewEl.style.display = '';
+  }
+}
+
+async function processExcel() {
+  if (!window._excelData) { toast(T('Select file first','पहले फ़ाइल चुनें')); return }
+  const { dataRows, colMap, dateCols } = window._excelData;
+  const monthVal = $('xlMo').value;
+  if (!monthVal) { toast(T('Select month','महीना चुनें')); return }
+  const [year, month] = monthVal.split('-').map(Number);
+  const daysInMonth = new Date(year, month, 0).getDate();
+  const deptKeys = Object.keys(config.depts || {});
+  const existingEmps = getEmployees();
+
+  const btn = $('xlBtn');
+  btn.textContent = '⏳ Processing...'; btn.disabled = true;
+
+  // Show progress bar
+  const progressEl = $('xlProgress');
+  progressEl.style.display = '';
+  progressEl.innerHTML = `<div style="font-size:11px;font-weight:700;color:var(--tx2);margin-bottom:4px" id="xlProgText">Processing 0/${dataRows.length}...</div><div class="prog-wrap"><div class="prog-bar" id="xlProgBar" style="width:0%"></div></div>`;
+
+  let empAdded = 0, empUpdated = 0, totalShifts = 0;
+
+  try {
+    // BATCH: Collect all shift updates first, then write per-date
+    const shiftBatch = {}; // { dateKey: { empId: shiftCode } }
+    const empOps = []; // deferred employee operations
+    const unknownShiftCodes = new Set(); // Track codes not in config
+
+    for (let ri = 0; ri < dataRows.length; ri++) {
+      const row = dataRows[ri];
+      const name = String(row[colMap.name] || '').trim();
+      if (!name) continue;
+      const code = colMap.code >= 0 ? String(row[colMap.code]||'').trim().toUpperCase() : '';
+      const phone = colMap.mobile >= 0 ? String(row[colMap.mobile]||'').replace(/\D/g,'') : '';
+      const desig = colMap.desig >= 0 ? String(row[colMap.desig]||'').trim() : '';
+      const dept = colMap.dept >= 0 ? String(row[colMap.dept]||'').trim() : '';
+      const woff = colMap.woff >= 0 ? String(row[colMap.woff]||'').trim() : '';
+
+      // Match dept key from name
+      let deptKey = deptKeys[0] || '';
+      if (dept) {
+        const deptLower = dept.toLowerCase();
+        const matchedDept = Object.entries(config.depts||{}).find(([k,d]) => d.name.toLowerCase().includes(deptLower) || k.toLowerCase().includes(deptLower));
+        if (matchedDept) deptKey = matchedDept[0];
+      }
+
+      // Check if employee exists
+      let emp = code ? existingEmps.find(e => e.empId && e.empId.toUpperCase() === code) : null;
+      let empId;
+
+      if (emp) {
+        empId = emp.id;
+        const updates = {};
+        if (name) updates.name = name;
+        if (desig) updates.designation = desig;
+        if (phone) updates.phone = phone;
+        if (woff) updates.woff = woff;
+        if (deptKey) updates.dept = deptKey;
+        if (Object.keys(updates).length) empOps.push({ type:'update', id:empId, data:updates });
+        empUpdated++;
+      } else {
+        empId = 'e_' + Date.now() + '_' + ri;
+        empOps.push({ type:'create', id:empId, data:{ id:empId, name, empId:code, phone, dept:deptKey, designation:desig, woff, status:'active', createdAt:new Date().toISOString() } });
+        if (phone.length === 10) empOps.push({ type:'wkrIdx', phone, managerId:session.managerId, empId });
+        existingEmps.push({ id:empId, empId:code, name });
+        empAdded++;
+      }
+
+      // Collect shifts into batch (NOT individual writes)
+      for (const dc of dateCols) {
+        if (dc.day < 1 || dc.day > daysInMonth) continue;
+        const shiftVal = String(row[dc.idx] || '').trim().toUpperCase();
+        if (!shiftVal) continue;
+        const dk = dateKey(new Date(year, month-1, dc.day));
+        if (!shiftBatch[dk]) shiftBatch[dk] = {};
+        shiftBatch[dk][empId] = shiftVal;
+        totalShifts++;
+        // Track unknown shift codes
+        if (shiftVal && !(config.shifts||{})[shiftVal]) unknownShiftCodes.add(shiftVal);
+      }
+
+      // Update progress
+      const pct = Math.round(((ri+1) / dataRows.length) * 50);
+      const progText = $('xlProgText'), progBar = $('xlProgBar');
+      if (progText) progText.textContent = `Reading ${ri+1}/${dataRows.length}...`;
+      if (progBar) progBar.style.width = pct + '%';
+    }
+
+    // AUTO-REGISTER unknown shift codes found in Excel
+    if (unknownShiftCodes.size > 0) {
+      const autoColors = ['#f59e0b','#818cf8','#06b6d4','#ec4899','#84cc16','#f97316','#14b8a6','#a855f7','#ef4444','#64748b'];
+      let colorIdx = Object.keys(config.shifts||{}).length;
+      const newShifts = {};
+      for (const code of unknownShiftCodes) {
+        const color = autoColors[colorIdx % autoColors.length];
+        // Generate smart labels for common codes
+        const labelMap = { 'C/O':'Comp Off', 'GP':'Gate Pass', 'H':'Holiday', 'HD':'Half Day', 'HLF':'Half Day',
+          'WO':'Week Off', 'P':'Present', 'A':'Absent', 'CL':'Casual Leave', 'SL':'Sick Leave', 'EL':'Earned Leave',
+          'PL':'Paid Leave', 'UL':'Unpaid Leave', 'T':'Training', 'OT':'Overtime', 'HL':'Holiday' };
+        const label = labelMap[code] || code;
+        newShifts[code] = { label, color };
+        config.shifts[code] = { label, color };
+        colorIdx++;
+      }
+      // Batch save all new shift types to Firebase
+      try { await mgrUpdate('config/shiftTypes', newShifts) } catch(e) { console.warn('Auto-add shifts error:', e) }
+      toast('🔧 Auto-added shift codes: ' + [...unknownShiftCodes].join(', '));
+    }
+
+    // Execute employee operations
+    for (const op of empOps) {
+      if (op.type === 'create') await mgrSet('employees/' + op.id, op.data);
+      else if (op.type === 'update') await mgrUpdate('employees/' + op.id, op.data);
+      else if (op.type === 'wkrIdx') await fbSet('wkrIdx/' + op.phone, { managerId: op.managerId, empId: op.empId });
+    }
+
+    // BATCH WRITE shifts (one update per date instead of one per cell)
+    const dateKeys = Object.keys(shiftBatch);
+    for (let di = 0; di < dateKeys.length; di++) {
+      const dk = dateKeys[di];
+      await mgrUpdate('shifts/' + dk, shiftBatch[dk]);
+      const pct = 50 + Math.round(((di+1) / dateKeys.length) * 50);
+      const progText = $('xlProgText'), progBar = $('xlProgBar');
+      if (progText) progText.textContent = `Writing shifts ${di+1}/${dateKeys.length} dates...`;
+      if (progBar) progBar.style.width = pct + '%';
+    }
+
+    closeModal(); window._excelData = null;
+    progressEl.style.display = 'none';
+    toast('✅ ' + empAdded + ' new + ' + empUpdated + ' updated, ' + totalShifts + ' shifts!');
+    logAudit('excel_upload', empAdded + ' new, ' + empUpdated + ' updated, ' + totalShifts + ' shifts');
+    renderSchedule(); renderTeam();
+  } catch(e) {
+    toast('❌ Error: ' + e.message); console.error('Excel process error:', e);
+    progressEl.innerHTML = `<div style="padding:8px;background:var(--redBg);border-radius:8px;font-size:11px;color:var(--red);font-weight:700">❌ ${esc(e.message)}</div>`;
+  }
+  btn.textContent = T('Upload & Process','अपलोड और प्रोसेस'); btn.disabled = false;
+}
+
+// ═══════════════════════════════════════════
+// INSTRUCTIONS
+// ═══════════════════════════════════════════
+function renderInstructions() {
+  if (isManager()) $('instActions').style.display = '';
+  const list = cache.instructions;
+  const el = $('instList');
+  if (!list.length) { el.innerHTML = `<div class="empty"><div class="empty-i">📌</div><div class="empty-t">${T('No instructions','कोई निर्देश नहीं')}</div></div>`; return }
+  el.innerHTML = list.map(inst =>
+    `<div style="margin-bottom:14px">
+      <div style="font-size:15px;font-weight:900;color:var(--txt);margin-bottom:7px">${esc(inst.title||'')}</div>
+      ${(inst.items||[]).map(it => `<div class="crd" style="display:flex;gap:9px">
+        <div style="font-size:18px">${esc(it.icon||'📌')}</div>
+        <div><div style="font-size:12px;font-weight:700;color:var(--tx2)">${esc(it.text)}</div>
+        ${it.note?`<div style="font-size:10px;color:var(--mt);margin-top:1px;font-weight:600">${esc(it.note)}</div>`:''}</div>
+      </div>`).join('')}
+      ${isManager()?`<button onclick="deleteInstruction('${esc(inst._key)}')" style="font-size:10px;color:var(--red);background:none;border:none;cursor:pointer;font-weight:700">🗑️ Delete</button>`:''}
+    </div>`
+  ).join('');
+}
+let instrItemCount = 0;
+function openAddInstruction() {
+  instrItemCount = 0;
+  openModal(`<div class="m-handle"></div><div class="m-title">${T('Add Instructions','निर्देश जोड़ें')}</div>
+    <div class="fld"><label>Section Title</label><input id="inTitle"></div>
+    <div id="inItems"></div>
+    <button onclick="addInstructionItem()" class="btn-s" style="width:100%;margin-bottom:10px">+ Add Item</button>
+    <button class="btn-p" onclick="submitInstruction()">Save</button>
+    <button class="btn-s" onclick="closeModal()" style="width:100%;margin-top:7px">Cancel</button>`);
+  addInstructionItem();
+}
+function addInstructionItem() {
+  const n = instrItemCount++;
+  $('inItems').innerHTML += `<div style="background:var(--crd2);border:1px solid var(--brd);border-radius:8px;padding:8px;margin-bottom:6px">
+    <div style="display:flex;gap:5px;margin-bottom:5px"><input class="l-inp" id="iIcon${n}" placeholder="📌" style="width:48px;margin:0"><input class="l-inp" id="iText${n}" placeholder="Text" style="flex:1;margin:0"></div>
+    <input class="l-inp" id="iNote${n}" placeholder="Note (optional)" style="margin:0">
+  </div>`;
+}
+async function submitInstruction() {
+  const title = $('inTitle').value.trim();
+  if (!title) { toast('Title required'); return }
+  const items = [];
+  for (let i=0; i<instrItemCount; i++) {
+    const text = $('iText'+i)?.value?.trim();
+    if (text) items.push({ icon: $('iIcon'+i)?.value?.trim() || '📌', text, note: $('iNote'+i)?.value?.trim() || '' });
+  }
+  if (!items.length) { toast('Add items'); return }
+  try { await mgrPush('instructions', { title, items }); instrItemCount = 0; closeModal(); toast('✅') } catch(e) { toast('Error') }
+}
+async function deleteInstruction(key) {
+  if (!confirm('Delete?')) return;
+  try { await mgrRemove('instructions/' + key); toast('✅') } catch(e) { toast('Error') }
+}
+
+// ═══════════════════════════════════════════
+// SUPER ADMIN
+// ═══════════════════════════════════════════
+async function loadSuperAdmin() {
+  try {
+    const managers = await fbGet('managers');
+    const list = managers ? Object.entries(managers) : [];
+    let totalWorkers = 0;
+    const companies = new Set();
+    const rows = [];
+    for (const [mid, mData] of list) {
+      const profile = mData.profile || {};
+      const emps = mData.employees ? Object.values(mData.employees) : [];
+      totalWorkers += emps.length;
+      companies.add(profile.company || '');
+      rows.push({ id:mid, name:profile.name, phone:profile.phone, company:profile.company, industry:profile.industry, workerCount:emps.length, emps, at:profile.createdAt });
+    }
+    $('saMgrCount').textContent = list.length;
+    $('saWkrCount').textContent = totalWorkers;
+    $('saCompCount').textContent = companies.size;
+    $('saActCount').textContent = list.length + totalWorkers;
+    $('saManagerList').innerHTML = rows.length ? rows.map(r =>
+      `<div class="crd">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+          <div class="u-av" style="width:36px;height:36px;font-size:15px">${(r.name||'?').charAt(0)}</div>
+          <div style="flex:1"><div class="crd-n">${esc(r.name)} <span class="role-t mgr">Manager</span></div>
+            <div class="crd-s">📱 ${esc(r.phone)} · 🏢 ${esc(r.company)} · ${esc(r.industry)}</div></div>
+          <div style="text-align:right"><div style="font-family:var(--Fd);font-size:18px;font-weight:800;color:var(--blu)">${r.workerCount}</div><div style="font-size:8px;color:var(--mt);font-weight:700">WORKERS</div></div>
+        </div>
+        ${r.emps.length?`<div style="max-height:140px;overflow-y:auto;border-top:1px solid var(--brd);padding-top:6px;margin-top:4px">
+          ${r.emps.filter(e=>e.status!=='left').map(e => `<div style="display:flex;align-items:center;gap:6px;padding:3px 0;font-size:11px;color:var(--tx2)">
+            <span style="color:var(--grn);font-size:8px">●</span><b>${esc(e.name)}</b>
+            <span style="color:var(--mt)">${esc(e.empId||'')}</span>
+            ${e.phone?`<span style="color:var(--mt)">📱${esc(e.phone)}</span>`:''}
+            <span style="color:var(--mt);margin-left:auto">${esc(e.dept||'')}</span>
+          </div>`).join('')}
+        </div>`:'<div style="font-size:11px;color:var(--mt);padding:6px 0;font-weight:600">No workers yet</div>'}
+      </div>`
+    ).join('') : '<div class="empty"><div class="empty-t">No managers yet</div></div>';
+  } catch(e) { console.error('SA load error:', e) }
+}
+
+// ═══════════════════════════════════════════
+// PROFILE & SETTINGS
+// ═══════════════════════════════════════════
+function showProfile() {
+  openModal(`<div class="m-handle"></div>
+    <div style="text-align:center;margin-bottom:14px">
+      <div class="u-av" style="width:54px;height:54px;font-size:22px;margin:0 auto 7px;border-radius:14px">${(session.name||'?').charAt(0)}</div>
+      <div style="font-size:17px;font-weight:900;color:var(--txt)">${esc(session.name)}</div>
+      <div style="font-size:12px;color:var(--mt);font-weight:600">${esc(session.role)} · ${esc(session.phone||'')}</div>
+      <div style="font-size:11px;color:var(--mt2);font-weight:600">${esc(session.company||'Man Power')} · mp.vkstech.com</div>
+    </div>
+    ${isManager()?`<div class="crd" onclick="closeModal();openSettings()" style="cursor:pointer"><div class="crd-n">⚙️ ${T('Company Settings','कंपनी सेटिंग्स')}</div><div class="crd-s">${T('Departments, shifts, audit log','विभाग, शिफ्ट')}</div></div>`:''}
+    ${isManager()?`<div class="crd" onclick="closeModal();viewAuditLog()" style="cursor:pointer"><div class="crd-n">📜 ${T('Audit Log','ऑडिट लॉग')}</div><div class="crd-s">${T('View all changes','सभी बदलाव देखें')}</div></div>`:''}
+    ${isSuperAdmin()?`<div class="crd" onclick="closeModal();openChangePassword()" style="cursor:pointer"><div class="crd-n">🔐 ${T('Change Password','पासवर्ड बदलें')}</div><div class="crd-s">${T('Update your Super Admin password','सुपर एडमिन पासवर्ड अपडेट करें')}</div></div>`:''}
+    <div class="crd" onclick="doLogout()" style="cursor:pointer;border-color:rgba(220,38,38,.2)"><div class="crd-n" style="color:var(--red)">🚪 ${T('Logout','लॉगआउट')}</div></div>`);
+}
+function doLogout() { clearSession(); try { window._signOut() } catch(e) {} location.reload() }
+
+// ─── CHANGE SA PASSWORD ───
+function openChangePassword() {
+  openModal(`<div class="m-handle"></div>
+    <div class="m-title">🔐 ${T('Change Password','पासवर्ड बदलें')}</div>
+    <div style="font-size:11px;color:var(--mt);margin-bottom:14px;font-weight:600">${T('Update your Super Admin password','सुपर एडमिन पासवर्ड अपडेट करें')}</div>
+    <div class="l-err" id="cpErr"></div>
+    <div class="fld"><label>${T('Current Password','वर्तमान पासवर्ड')}</label><input type="password" id="cpOld" placeholder="${T('Enter current password','वर्तमान पासवर्ड दर्ज करें')}"></div>
+    <div class="fld"><label>${T('New Password','नया पासवर्ड')}</label><input type="password" id="cpNew" placeholder="${T('Enter new password (6+ chars)','नया पासवर्ड (6+ अक्षर)')}"></div>
+    <div class="fld"><label>${T('Confirm New Password','नया पासवर्ड पुनः दर्ज करें')}</label><input type="password" id="cpConfirm" placeholder="${T('Re-enter new password','नया पासवर्ड पुनः दर्ज करें')}"></div>
+    <button class="btn-p" onclick="submitChangePassword()" style="background:linear-gradient(135deg,#7c3aed,#6d28d9)">${T('Update Password','पासवर्ड अपडेट करें')}</button>
+    <button class="btn-s" onclick="closeModal()" style="width:100%;margin-top:7px">${T('Cancel','रद्द करें')}</button>`);
+}
+async function submitChangePassword() {
+  const oldPwd = $('cpOld').value.trim();
+  const newPwd = $('cpNew').value.trim();
+  const confirmPwd = $('cpConfirm').value.trim();
+  const errEl = $('cpErr');
+  const showCPErr = msg => { errEl.textContent = msg; errEl.classList.add('show'); setTimeout(() => errEl.classList.remove('show'), 4000) };
+
+  if (!oldPwd) { showCPErr(T('Enter current password','वर्तमान पासवर्ड दर्ज करें')); return }
+  if (!newPwd || newPwd.length < 6) { showCPErr(T('New password must be 6+ characters','नया पासवर्ड 6+ अक्षर')); return }
+  if (newPwd !== confirmPwd) { showCPErr(T('New passwords do not match','नए पासवर्ड मेल नहीं खाते')); return }
+  if (oldPwd === newPwd) { showCPErr(T('New password must be different','नया पासवर्ड अलग होना चाहिए')); return }
+
+  try {
+    // Verify current password
+    const storedHash = await fbGet('superadmin/passHash');
+    const oldHash = await sha256(oldPwd);
+    if (oldHash !== storedHash) { showCPErr(T('Current password is wrong','वर्तमान पासवर्ड गलत है')); return }
+
+    // Set new password
+    const newHash = await sha256(newPwd);
+    await fbSet('superadmin/passHash', newHash);
+    await fbSet('superadmin/passwordChangedAt', new Date().toISOString());
+
+    closeModal();
+    toast('✅ ' + T('Password changed successfully!','पासवर्ड सफलतापूर्वक बदला गया!'));
+  } catch(e) { showCPErr('Error: ' + e.message) }
+}
+
+function openSettings() {
+  const depts = config.depts || {}, shifts = config.shifts || {};
+  openModal(`<div class="m-handle"></div><div class="m-title">⚙️ Settings</div>
+    <div style="font-size:12px;font-weight:800;color:var(--acc);margin-bottom:6px">Departments</div>
+    ${Object.entries(depts).map(([k,d]) => `<div style="display:flex;align-items:center;gap:5px;margin-bottom:3px"><div style="width:11px;height:11px;border-radius:3px;background:${esc(d.color)}"></div><span style="font-size:12px;font-weight:700;color:var(--tx2)">${esc(d.name)}</span></div>`).join('')}
+    <div style="display:flex;gap:5px;margin:8px 0 14px"><input class="l-inp" id="csD" placeholder="New dept" style="flex:1;margin:0"><input type="color" id="csDC" value="#ea580c" style="width:38px;height:38px;border:none;border-radius:7px;cursor:pointer"><button onclick="addConfigDept()" style="padding:8px 12px;border-radius:8px;border:none;background:var(--acc);color:#fff;font-weight:800;cursor:pointer">+</button></div>
+    <div style="font-size:12px;font-weight:800;color:var(--acc);margin-bottom:6px">Shift Types</div>
+    ${Object.entries(shifts).map(([c,s]) => `<span class="shc" style="background:${esc(s.color)}18;color:${esc(s.color)};margin:2px">${esc(c)}</span>`).join('')}
+    <div style="display:flex;gap:4px;margin:8px 0 14px"><input class="l-inp" id="csS" placeholder="Code" style="width:48px;margin:0;text-align:center"><input class="l-inp" id="csSL" placeholder="Label" style="flex:1;margin:0"><input type="color" id="csSC" value="#f59e0b" style="width:38px;height:38px;border:none;border-radius:7px;cursor:pointer"><button onclick="addConfigShift()" style="padding:8px 10px;border-radius:8px;border:none;background:var(--acc);color:#fff;font-weight:800;cursor:pointer">+</button></div>
+    <button class="btn-s" onclick="closeModal()" style="width:100%">Close</button>`);
+}
+async function addConfigDept() {
+  const name = $('csD').value.trim(), color = $('csDC').value;
+  if (!name) return;
+  const key = name.toUpperCase().replace(/\s+/g,'_').slice(0,12);
+  try {
+    await mgrSet('config/departments/' + key, { name, color });
+    config.depts[key] = { name, color }; closeModal(); openSettings(); toast('✅');
+  } catch(e) { toast('Error') }
+}
+async function addConfigShift() {
+  const code = $('csS').value.trim().toUpperCase(), label = $('csSL').value.trim(), color = $('csSC').value;
+  if (!code || !label) return;
+  try {
+    await mgrSet('config/shiftTypes/' + code, { label, color });
+    config.shifts[code] = { label, color }; closeModal(); openSettings(); toast('✅');
+  } catch(e) { toast('Error') }
+}
+
+// ─── AUDIT LOG VIEWER ───
+async function viewAuditLog() {
+  try {
+    const logs = await mgrGet('auditLog');
+    const list = logs ? Object.values(logs).sort((a,b) => (b.at||'').localeCompare(a.at||'')).slice(0,50) : [];
+    openModal(`<div class="m-handle"></div><div class="m-title">📜 ${T('Audit Log','ऑडिट लॉग')}</div>
+      <div style="max-height:70vh;overflow-y:auto">
+        ${list.length ? list.map(l => `<div class="audit-item">
+          <div class="audit-action">${esc(l.action?.replace(/_/g,' ') || '')}</div>
+          <div>${esc(l.details||'')}</div>
+          <div class="audit-time">${esc(l.by||'')} · ${l.at ? new Date(l.at).toLocaleString('en-IN') : ''}</div>
+        </div>`).join('') : '<div class="empty"><div class="empty-t">No audit logs yet</div></div>'}
+      </div>
+      <button class="btn-s" onclick="closeModal()" style="width:100%;margin-top:10px">Close</button>`);
+  } catch(e) { toast('Error loading audit log') }
+}
+
+// ═══════════════════════════════════════════
+// PWA INSTALL
+// ═══════════════════════════════════════════
+let _pwaPrompt = null;
+function initPWA() {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').then(r => {
+      r.addEventListener('updatefound', () => {
+        const nw = r.installing;
+        if (nw) nw.addEventListener('statechange', () => {
+          if (nw.state === 'installed' && navigator.serviceWorker.controller) {
+            nw.postMessage('SKIP_WAITING');
+            toast('🔄 ' + T('Updating...','अपडेट...'));
+            setTimeout(() => location.reload(), 2000);
+          }
+        });
+      });
+    }).catch(e => console.log('SW error:', e));
+  }
+  const isInstalled = window.matchMedia('(display-mode:standalone)').matches || window.navigator.standalone === true;
+  if (!isInstalled) setTimeout(() => { const b = $('pwaLoginBtn'); if(b) b.style.display = 'flex' }, 600);
+  window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); _pwaPrompt = e; const b = $('pwaLoginBtn'); if(b) b.style.display = 'flex' });
+  window.addEventListener('appinstalled', () => { toast('✅ App installed!'); _pwaPrompt = null; const b = $('pwaLoginBtn'); if(b) b.style.display = 'none' });
+}
+async function doPWAInstall() {
+  if (_pwaPrompt) {
+    try { _pwaPrompt.prompt(); const r = await _pwaPrompt.userChoice; if (r.outcome === 'accepted') toast('✅ Installing...'); _pwaPrompt = null } catch(e) { _pwaPrompt = null; showPWAInstructions() }
+    return;
+  }
+  showPWAInstructions();
+}
+function showPWAInstructions() {
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isInstalled = window.matchMedia('(display-mode:standalone)').matches || window.navigator.standalone === true;
+  if (isInstalled) { toast('✅ App already installed!'); return }
+  if (isIOS) {
+    openModal(`<div class="m-handle"></div><div class="m-title">📲 Install on iPhone</div>
+      <div style="font-size:14px;line-height:2;color:var(--tx2);font-weight:600">
+        <div>1️⃣ Open in Safari</div><div>2️⃣ Tap <b>Share 📤</b></div>
+        <div>3️⃣ Select <b>"Add to Home Screen"</b></div><div>4️⃣ Tap <b>Add</b></div>
+      </div><button class="btn-s" onclick="closeModal()" style="width:100%;margin-top:14px">OK</button>`);
+  } else {
+    openModal(`<div class="m-handle"></div><div class="m-title">📲 Install App</div>
+      <div style="font-size:14px;line-height:2;color:var(--tx2);font-weight:600">
+        <div>1️⃣ Open in Chrome</div><div>2️⃣ Tap <b>⋮ (3 dots)</b></div>
+        <div>3️⃣ Select <b>"Add to Home Screen"</b></div><div>4️⃣ Tap <b>Install</b></div>
+      </div><button class="btn-s" onclick="closeModal()" style="width:100%;margin-top:14px">OK</button>`);
+  }
+}
+initPWA();
+
+// ═══════════════════════════════════════════
+// STARTUP
+// ═══════════════════════════════════════════
+document.addEventListener('firebase-ready', async () => {
+  setTimeout(() => { $('loader').style.display = 'none' }, 700);
+  if (loadSession()) {
+    const hasFP = localStorage.getItem('fp_cred');
+    if (hasFP && session.role !== 'superadmin') {
+      if (session.managerId) {
+        try { const cfg = await fbGet('managers/' + session.managerId + '/config'); config = { depts: cfg?.departments||{}, shifts: cfg?.shiftTypes||{} } } catch(e) {}
+      }
+      showFingerprintScreen(); return;
+    }
+    if (session.managerId) {
+      try { const cfg = await fbGet('managers/' + session.managerId + '/config'); config = { depts: cfg?.departments||{}, shifts: cfg?.shiftTypes||{} } } catch(e) {}
+    }
+    launchApp(); return;
+  }
+  $('loginScr').classList.add('show'); showStep('ls1');
+});
+// Fallback if Firebase doesn't load
+setTimeout(() => {
+  const loader = $('loader');
+  if (loader && loader.style.display !== 'none') {
+    loader.style.display = 'none';
+    $('loginScr').classList.add('show'); showStep('ls1');
+  }
+}, 6000);
+</script>
+</body>
+</html>
