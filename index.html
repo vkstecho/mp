@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="en" translate="no">
+<head>
+<meta charset="UTF-8">
+<meta name="google" content="notranslate">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#ffffff">
+<title>Man Power — Shift Management</title>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="description" content="Man Power — Universal Shift Management System · mp.vkstech.com">
+<link rel="canonical" href="https://mp.vkstech.com">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icon-192.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@700;800&family=Barlow+Condensed:wght@700;800;900&display=swap" rel="stylesheet">
+
+<!-- Firebase -->
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import{getDatabase,ref,set,get,onValue,push,update,remove}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import{getAuth,signInAnonymously,signOut,signInWithPhoneNumber,RecaptchaVerifier}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+const C={apiKey:"AIzaSyAyO1Haw1VwscF4DexHAOdvzDEXs1xWMG4",authDomain:"manpower26.firebaseapp.com",databaseURL:"https://manpower26-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"manpower26",storageBucket:"manpower26.firebasestorage.app",messagingSenderId:"168996239731",appId:"1:168996239731:web:5b627f67bd1e59bb22ad06"};
+try{const app=initializeApp(C);const db=getDatabase(app);const auth=getAuth(app);
+window._fb=async(op,p,v)=>{if(!auth.currentUser)try{await signInAnonymously(auth)}catch(e){}const r=ref(db,p);switch(op){case'g':return get(r);case's':return set(r,v);case'p':return push(r,v);case'u':return update(r,v);case'r':return remove(r);case'l':return onValue(r,v)}};
+window._auth=auth;window._out=()=>signOut(auth);
+window._otp=async ph=>{try{if(!window._rc)window._rc=new RecaptchaVerifier(auth,'rcBox',{size:'invisible'});const r=await signInWithPhoneNumber(auth,ph,window._rc);window._vfy=c=>r.confirm(c);return{ok:1}}catch(e){window._rc=null;return{ok:0,e:e.message}}};
+window._fbok=1}catch(e){console.error(e)}
+const go=()=>{try{document.dispatchEvent(new Event('fbgo'))}catch(e){}};
+document.readyState==='loading'?document.addEventListener('DOMContentLoaded',go):setTimeout(go,50);
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<style>
+/* ═══════════════════════════════════════════
+   MAN POWER — LIGHT-FIRST READABLE THEME
+   ═══════════════════════════════════════════ */
+:root{
+  --bg:#f4f5f9;--bg2:#ebedf2;--pnl:#fff;--crd:#fff;--crd2:#f7f8fb;
+  --brd:#e0e3ea;--brd2:#cdd1da;
+  --acc:#c2410c;--acc2:#9a3412;--accLt:#fff7ed;--accBg:rgba(194,65,12,.07);
+  --blu:#2563eb;--bluBg:rgba(37,99,235,.06);
+  --grn:#15803d;--grnBg:rgba(21,128,61,.06);
+  --red:#dc2626;--redBg:rgba(220,38,38,.06);
+  --prp:#7c3aed;--prpBg:rgba(124,58,237,.06);
+  --txt:#1e293b;--tx2:#334155;--mt:#64748b;--mt2:#94a3b8;
+  --R:14px;--Rs:10px;
+  --F:'Nunito',system-ui,sans-serif;--Fd:'JetBrains Mono','Nunito',monospace;
+  --shadow:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+  --shadow2:0 4px 12px rgba(0,0,0,.08);
+}
+
+/* ── DARK MODE ── */
+body.dark{
+  --bg:#0b1120;--bg2:#0f1729;--pnl:#162032;--crd:#1a2740;--crd2:#1e2f4a;
+  --brd:rgba(255,255,255,.07);--brd2:rgba(255,255,255,.12);
+  --acc:#f59e0b;--acc2:#d97706;--accLt:rgba(245,158,11,.1);--accBg:rgba(245,158,11,.08);
+  --blu:#60a5fa;--bluBg:rgba(96,165,250,.1);
+  --grn:#4ade80;--grnBg:rgba(74,222,128,.08);
+  --red:#f87171;--redBg:rgba(248,113,113,.08);
+  --prp:#c084fc;--prpBg:rgba(192,132,252,.08);
+  --txt:#e2e8f0;--tx2:#cbd5e1;--mt:#64748b;--mt2:#475569;
+  --shadow:0 1px 3px rgba(0,0,0,.3);--shadow2:0 4px 12px rgba(0,0,0,.4);
+}
+body.dark .hdr{background:var(--bg2);box-shadow:0 2px 12px rgba(0,0,0,.4)}
+body.dark .nav{background:var(--bg2)}
+body.dark .login-screen{background:linear-gradient(155deg,#060918,#0e1528,#120a22)}
+body.dark .lc{background:rgba(22,32,50,.92);border-color:rgba(255,255,255,.08)}
+body.dark .l-inp{background:rgba(30,47,74,.7);border-color:rgba(255,255,255,.12);color:#fff}
+body.dark .l-inp::placeholder{color:rgba(255,255,255,.3)}
+body.dark .otp-inp{background:rgba(30,47,74,.5);border-color:rgba(255,255,255,.12);color:#fff}
+body.dark #fpScr{background:linear-gradient(155deg,#060918,#0e1528,#120a22)}
+body.dark .toast{background:var(--crd2);color:var(--txt);border-color:var(--brd2)}
+
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:var(--F);background:var(--bg);color:var(--txt);max-width:520px;margin:0 auto;min-height:100vh;overflow-x:hidden;padding-bottom:86px;-webkit-user-select:none;user-select:none}
+@media(min-width:769px){
+  body{max-width:820px}
+  .nav{max-width:820px}
+  .modal-box{max-width:620px}
+  .stat-v{font-size:32px}
+  .pg-t{font-size:24px}
+  .crd{padding:16px}
+}
+input,textarea{-webkit-user-select:text!important;user-select:text!important}
+@supports(padding:env(safe-area-inset-bottom)){body{padding-bottom:calc(86px+env(safe-area-inset-bottom))}.nav{padding-bottom:env(safe-area-inset-bottom)}}
+
+/* ═══ LOADER ═══ */
+#loader{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}
+.ld-logo{font-family:var(--Fd);font-size:36px;font-weight:800;color:var(--acc)}
+.mp-logo{filter:drop-shadow(0 0 12px rgba(249,115,22,.2))}
+.pwa-btn{display:flex;align-items:center;gap:8px;padding:12px 18px;border-radius:12px;border:1.5px solid rgba(194,65,12,.25);background:var(--accBg);color:var(--acc);font-size:13px;font-weight:800;cursor:pointer;font-family:var(--F);margin-top:14px;width:100%;justify-content:center;transition:.15s}
+.pwa-btn:active{transform:scale(.97);background:rgba(194,65,12,.12)}
+.ld-sub{font-size:10px;color:var(--mt);letter-spacing:3px;text-transform:uppercase;font-weight:700}
+.ld-bar{width:130px;height:3px;background:var(--brd);border-radius:2px;overflow:hidden}
+.ld-fill{height:100%;background:linear-gradient(90deg,var(--acc),var(--blu));border-radius:2px;animation:ldF 1.6s ease forwards}
+@keyframes ldF{from{width:0}to{width:100%}}
+
+/* ═══ HEADER ═══ */
+.hdr{background:var(--pnl);border-bottom:1px solid var(--brd);position:sticky;top:0;z-index:100;box-shadow:var(--shadow)}
+.hdr-top{display:flex;align-items:center;justify-content:space-between;padding:10px 14px 7px}
+.hdr-brand{font-family:var(--Fd);font-size:20px;font-weight:800;color:var(--acc)}
+.hdr-brand span{color:var(--tx2)}
+.hdr-r{display:flex;align-items:center;gap:6px}
+.hdr-btn{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:var(--crd2);border:1px solid var(--brd);cursor:pointer;font-size:15px;color:var(--tx2);transition:.15s}
+.hdr-btn:active{background:var(--brd)}
+.u-chip{display:flex;align-items:center;gap:6px;background:var(--crd2);border:1px solid var(--brd);border-radius:10px;padding:4px 10px 4px 4px;cursor:pointer;transition:.15s}
+.u-chip:active{background:var(--brd)}
+.u-av{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--Fd);font-weight:800;font-size:13px;color:#fff;background:linear-gradient(135deg,#ea580c,#2563eb)}
+.u-name{font-size:13px;font-weight:800;color:var(--txt)}
+.role-t{font-size:8px;font-weight:800;padding:2px 6px;border-radius:4px;text-transform:uppercase;letter-spacing:.5px}
+.role-t.sa{background:var(--redBg);color:var(--red)}.role-t.mgr{background:var(--accBg);color:var(--acc)}.role-t.wkr{background:var(--grnBg);color:var(--grn)}.role-t.teamlead{background:var(--bluBg);color:var(--blu)}
+.sync-r{display:flex;align-items:center;gap:5px;padding:3px 14px;background:var(--grnBg);border-bottom:1px solid rgba(21,128,61,.08);font-size:10px;color:var(--grn);font-weight:700}
+
+/* ═══ NAV ═══ */
+.nav{display:flex;justify-content:space-around;padding:4px 6px 6px;background:var(--pnl);border-top:1px solid var(--brd);position:fixed;bottom:0;left:0;right:0;max-width:520px;margin:0 auto;z-index:100;box-shadow:0 -1px 4px rgba(0,0,0,.04)}
+.nb{display:flex;flex-direction:column;align-items:center;gap:1px;background:none;border:none;color:var(--mt);cursor:pointer;font-family:var(--F);font-size:9px;font-weight:700;padding:3px 5px;min-width:46px;position:relative;transition:.15s}
+.nb-i{font-size:18px}.nb.on{color:var(--acc)}
+.nb.on::after{content:'';position:absolute;bottom:0;width:18px;height:2.5px;background:var(--acc);border-radius:2px}
+.nb-b{position:absolute;top:-2px;right:2px;min-width:15px;height:15px;background:var(--red);border-radius:8px;font-size:8px;font-weight:800;color:#fff;display:flex;align-items:center;justify-content:center;padding:0 3px}
+
+/* ═══ PAGES ═══ */
+.main{display:none;padding:14px 14px 18px}
+.tab{display:none}.tab.on{display:block}
+.pg-t{font-size:20px;font-weight:900;color:var(--txt);margin-bottom:3px}
+.pg-s{font-size:11px;color:var(--mt);margin-bottom:14px;font-weight:600}
+
+/* ═══ CARDS ═══ */
+.stat-c{background:var(--pnl);border:1px solid var(--brd);border-radius:var(--R);padding:13px;text-align:center;box-shadow:var(--shadow)}
+.stat-v{font-family:var(--Fd);font-size:28px;font-weight:800}
+.stat-l{font-size:9px;color:var(--mt);font-weight:700;text-transform:uppercase;letter-spacing:.3px;margin-top:2px}
+.crd{background:var(--pnl);border:1px solid var(--brd);border-radius:var(--R);padding:13px;margin-bottom:8px;box-shadow:var(--shadow);transition:border-color .15s}
+.crd:active{border-color:var(--acc)}
+.crd-n{font-size:14px;font-weight:800;color:var(--txt);margin-bottom:2px}
+.crd-s{font-size:11px;color:var(--mt);font-weight:600}
+
+/* ═══ CHIPS ═══ */
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:10px;scrollbar-width:none}.chips::-webkit-scrollbar{display:none}
+.chip{flex-shrink:0;padding:7px 14px;border-radius:20px;font-size:11px;font-weight:700;background:var(--crd2);border:1px solid var(--brd);cursor:pointer;white-space:nowrap;color:var(--tx2);transition:.15s}
+.chip.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+
+/* ═══ BUTTONS ═══ */
+.btn-p{width:100%;padding:14px;border-radius:var(--R);border:none;background:linear-gradient(135deg,#ea580c,#c2410c);color:#fff;font-family:var(--F);font-size:15px;font-weight:800;cursor:pointer;box-shadow:0 4px 14px rgba(194,65,12,.2);transition:transform .1s}
+.btn-p:active{transform:scale(.97)}
+.btn-s{padding:10px 14px;border-radius:var(--Rs);border:1.5px solid var(--brd);background:var(--pnl);color:var(--tx2);font-size:12px;font-weight:700;cursor:pointer;font-family:var(--F)}
+.btn-a{padding:9px 14px;border-radius:var(--Rs);border:none;background:linear-gradient(135deg,#ea580c,#c2410c);color:#fff;font-size:12px;font-weight:800;cursor:pointer;font-family:var(--F);box-shadow:0 2px 8px rgba(194,65,12,.15)}
+.act-r{display:flex;gap:7px;margin-bottom:13px;flex-wrap:wrap}
+
+/* ═══ FORMS ═══ */
+.fld{margin-bottom:13px}
+.fld label{display:block;font-size:10px;font-weight:800;color:var(--mt);text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px}
+.fld input,.fld select,.fld textarea{width:100%;padding:12px 13px;background:var(--crd2);border:1.5px solid var(--brd);border-radius:var(--Rs);color:var(--txt);font-size:15px;font-family:var(--F);outline:none;transition:border-color .15s}
+.fld input:focus,.fld select:focus,.fld textarea:focus{border-color:var(--acc)}
+.fld textarea{min-height:70px;resize:vertical}
+
+/* ═══ MODAL ═══ */
+.ov{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.35);backdrop-filter:blur(3px);align-items:flex-end;justify-content:center}
+.ov.open{display:flex}
+.modal-box{background:var(--pnl);border-radius:18px 18px 0 0;padding:18px 16px 30px;width:100%;max-width:520px;max-height:88vh;overflow-y:auto;animation:slUp .22s ease;border-top:3px solid var(--acc);box-shadow:0 -4px 24px rgba(0,0,0,.12)}
+@keyframes slUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.m-handle{width:34px;height:4px;background:var(--brd2);border-radius:2px;margin:0 auto 12px}
+.m-title{font-size:17px;font-weight:900;color:var(--txt);margin-bottom:13px}
+
+/* ═══ SCHEDULE ═══ */
+.sch-w{overflow-x:auto;margin:0 -14px;padding:0 14px}
+.sch-t{width:100%;min-width:620px;border-collapse:collapse;font-size:11px}
+.sch-t th{padding:7px 3px;background:var(--crd2);color:var(--mt);font-weight:700;font-size:9px;text-transform:uppercase;border-bottom:2px solid var(--brd)}
+.sch-t td{padding:5px 2px;text-align:center;border-bottom:1px solid var(--brd)}
+.sch-t .e-nm{text-align:left;padding-left:7px;font-weight:800;font-size:10px;color:var(--txt);white-space:nowrap;position:sticky;left:0;background:var(--pnl);z-index:3;min-width:95px;border-right:1px solid var(--brd)}
+.shc{display:inline-flex;align-items:center;justify-content:center;width:26px;height:22px;border-radius:5px;font-size:9px;font-weight:800;cursor:pointer;transition:transform .1s}
+.shc:hover{transform:scale(1.15)}
+.sch-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
+.sch-lbl{font-size:15px;font-weight:900;color:var(--txt)}
+.sch-nav button{width:34px;height:34px;border-radius:9px;border:1px solid var(--brd);background:var(--pnl);color:var(--tx2);font-size:17px;cursor:pointer;box-shadow:var(--shadow)}
+.sec-r td{background:var(--crd2)!important;padding:5px 7px!important}
+.sec-r-l{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.8px}
+
+/* ═══ LOGIN ═══ */
+.login-screen{display:none;position:fixed;inset:0;z-index:500;background:linear-gradient(155deg,#fff8f1,#f0f4ff,#fdf2f8);flex-direction:column;align-items:center;justify-content:center;padding:22px;overflow-y:auto}
+.login-screen.show{display:flex}
+.lc{background:var(--pnl);border:1px solid var(--brd);border-radius:18px;padding:24px 20px;width:100%;max-width:380px;box-shadow:0 8px 32px rgba(0,0,0,.08)}
+.l-logo{font-family:var(--Fd);font-size:32px;font-weight:800;color:var(--acc);text-align:center;margin-bottom:2px}
+.l-title{font-size:16px;font-weight:900;color:var(--txt);text-align:center;margin-bottom:3px}
+.l-sub{font-size:11px;color:var(--mt);text-align:center;margin-bottom:20px;font-weight:600}
+.l-inp{width:100%;padding:13px 15px;background:var(--crd2);border:1.5px solid var(--brd);border-radius:11px;color:var(--txt);font-size:15px;font-family:var(--F);outline:none;margin-bottom:11px;transition:border-color .15s}
+.l-inp:focus{border-color:var(--acc)}
+.l-inp::placeholder{color:var(--mt2)}
+.l-btn{width:100%;padding:15px;border:none;border-radius:13px;background:linear-gradient(135deg,#ea580c,#c2410c);color:#fff;font-size:15px;font-weight:800;cursor:pointer;font-family:var(--F);box-shadow:0 4px 16px rgba(194,65,12,.2);margin-top:3px}
+.l-btn:active{transform:scale(.97)}
+.l-btn.blue{background:linear-gradient(135deg,#2563eb,#1d4ed8);box-shadow:0 4px 16px rgba(37,99,235,.2)}
+.l-btn.grn{background:linear-gradient(135deg,#16a34a,#15803d);box-shadow:0 4px 16px rgba(22,163,74,.2)}
+.l-err{display:none;background:var(--redBg);border:1px solid rgba(220,38,38,.2);border-radius:9px;padding:9px;margin-bottom:11px;font-size:12px;color:var(--red);text-align:center;font-weight:700}
+.l-err.show{display:block}
+.l-link{color:var(--blu);font-size:12px;cursor:pointer;text-align:center;margin-top:11px;font-weight:700}
+.l-divider{border-top:1px solid var(--brd);margin:16px 0;position:relative}
+.l-divider::after{content:'OR';position:absolute;top:-8px;left:50%;transform:translateX(-50%);background:var(--pnl);padding:0 10px;font-size:10px;color:var(--mt2);font-weight:700}
+
+/* ═══ OTP ═══ */
+.otp-row{display:flex;gap:8px;justify-content:center;margin:14px 0}
+.otp-inp{width:44px;height:50px;border-radius:11px;border:2px solid var(--brd);background:var(--crd2);color:var(--txt);font-size:22px;font-weight:800;text-align:center;font-family:var(--Fd);outline:none}
+.otp-inp:focus{border-color:var(--acc)}
+
+/* ═══ TOAST ═══ */
+.toast{position:fixed;bottom:94px;left:50%;transform:translateX(-50%);background:var(--txt);color:#fff;padding:11px 20px;border-radius:10px;font-size:12px;font-weight:700;z-index:999;opacity:0;transition:opacity .3s;white-space:nowrap;max-width:90vw;text-align:center;box-shadow:var(--shadow2)}
+.toast.show{opacity:1}
+
+/* ═══ EMPTY ═══ */
+.empty{text-align:center;padding:36px 20px;color:var(--mt)}.empty-i{font-size:36px;margin-bottom:8px}.empty-t{font-size:13px;font-weight:700}
+
+/* ═══ FINGERPRINT ═══ */
+#fpScr{display:none;position:fixed;inset:0;z-index:450;background:linear-gradient(155deg,#fff8f1,#f0f4ff,#fdf2f8);flex-direction:column;align-items:center;justify-content:center;padding:30px;text-align:center}
+#fpScr.show{display:flex}
+body.dark #fpScr{background:linear-gradient(155deg,#060918,#0e1528,#120a22)}
+.fp-ring{width:96px;height:96px;border-radius:50%;border:3px solid var(--acc);display:flex;align-items:center;justify-content:center;font-size:40px;cursor:pointer;animation:fpP 2.5s ease infinite;margin-bottom:16px;background:var(--accBg)}
+@keyframes fpP{0%,100%{box-shadow:0 0 0 0 rgba(194,65,12,.2)}50%{box-shadow:0 0 0 16px rgba(194,65,12,0)}}
+.fp-t{font-size:18px;font-weight:900;color:var(--txt);margin-bottom:4px}
+.fp-s{font-size:12px;color:var(--mt);margin-bottom:16px;font-weight:600}
+.fp-skip{color:var(--blu);font-size:13px;cursor:pointer;font-weight:700}
+
+/* ═══ SA CARDS ═══ */
+.sa-c{background:var(--prpBg);border:1.5px solid rgba(124,58,237,.15);border-radius:var(--R);padding:14px;margin-bottom:10px}
+
+/* ═══ LEGEND ═══ */
+.legend{display:flex;flex-wrap:wrap;gap:7px;margin-top:7px}
+.leg{display:flex;align-items:center;gap:3px;font-size:10px;color:var(--mt);font-weight:600}
+
+/* ═══ NOTIFICATION BELL ═══ */
+.noti-btn{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:var(--crd2);border:1px solid var(--brd);cursor:pointer;font-size:17px;position:relative;transition:.15s}
+.noti-btn:active{background:var(--brd)}
+.noti-dot{position:absolute;top:-3px;right:-3px;min-width:17px;height:17px;background:var(--red);border-radius:9px;font-size:9px;font-weight:800;color:#fff;display:flex;align-items:center;justify-content:center;padding:0 4px;border:2px solid var(--pnl)}
+.noti-panel{max-height:70vh;overflow-y:auto}
+.noti-item{display:flex;gap:10px;padding:12px;border-bottom:1px solid var(--brd);transition:background .15s}
+.noti-item.unread{background:var(--accBg)}
+.noti-ico{font-size:22px;flex-shrink:0;width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center}
+.noti-body{flex:1;min-width:0}
+.noti-title{font-size:13px;font-weight:800;color:var(--txt);margin-bottom:2px}
+.noti-desc{font-size:11px;color:var(--mt);font-weight:600;line-height:1.4}
+.noti-time{font-size:9px;color:var(--mt2);font-weight:600;margin-top:3px}
+
+/* ═══ RESPONSIVE ═══ */
+@media(max-width:380px){.pg-t{font-size:17px!important}.stat-v{font-size:22px!important}.nb{font-size:8px;min-width:40px}}
+</style>
+</head>
+<body>
+<div id="rcBox"></div>
+
+<!-- LOADER -->
+<div id="loader">
+  <svg class="mp-logo" width="72" height="72" viewBox="0 0 110 110" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="lg1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#f97316"/><stop offset="50%" stop-color="#a855f7"/><stop offset="100%" stop-color="#38bdf8"/></linearGradient><linearGradient id="lg2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#f97316"/><stop offset="100%" stop-color="#ea580c"/></linearGradient><linearGradient id="lg3" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#38bdf8"/><stop offset="100%" stop-color="#0369a1"/></linearGradient><filter id="glow"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><polygon points="55,4 100,28 100,82 55,106 10,82 10,28" fill="none" stroke="url(#lg1)" stroke-width="2" opacity=".4"/><polygon points="55,10 95,32 95,78 55,100 15,78 15,32" fill="rgba(13,22,35,.9)" stroke="url(#lg1)" stroke-width="1.5"/><text x="35" y="73" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="46" fill="url(#lg2)" filter="url(#glow)">M</text><text x="76" y="73" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="46" fill="url(#lg3)" filter="url(#glow)">P</text><circle cx="55" cy="57" r="4" fill="#f97316" opacity=".9"/></svg>
+  <div class="ld-sub">Man Power</div>
+  <div style="font-size:10px;color:var(--mt2);margin-top:2px">mp.vkstech.com</div>
+  <div class="ld-bar"><div class="ld-fill"></div></div>
+</div>
+
+<!-- ═══ LOGIN ═══ -->
+<div class="login-screen" id="loginScr">
+<div style="width:100%;max-width:380px">
+  <div style="text-align:center;margin-bottom:6px">
+    <svg class="mp-logo" width="64" height="64" viewBox="0 0 110 110" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="llg1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#f97316"/><stop offset="50%" stop-color="#a855f7"/><stop offset="100%" stop-color="#38bdf8"/></linearGradient><linearGradient id="llg2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#f97316"/><stop offset="100%" stop-color="#ea580c"/></linearGradient><linearGradient id="llg3" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#38bdf8"/><stop offset="100%" stop-color="#0369a1"/></linearGradient></defs><polygon points="55,4 100,28 100,82 55,106 10,82 10,28" fill="none" stroke="url(#llg1)" stroke-width="2" opacity=".4"/><polygon points="55,10 95,32 95,78 55,100 15,78 15,32" fill="rgba(13,22,35,.9)" stroke="url(#llg1)" stroke-width="1.5"/><text x="35" y="73" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="46" fill="url(#llg2)">M</text><text x="76" y="73" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="46" fill="url(#llg3)">P</text><circle cx="55" cy="57" r="4" fill="#f97316" opacity=".9"/></svg>
+  </div>
+  <div style="font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;text-align:center;color:var(--txt);margin-bottom:1px">Man Power</div>
+  <div class="l-title" data-en="Shift Management System" data-hi="शिफ्ट प्रबंधन प्रणाली">Shift Management System</div>
+  <div class="l-sub" data-en="mp.vkstech.com · For any industry" data-hi="mp.vkstech.com · किसी भी उद्योग के लिए">mp.vkstech.com · For any industry</div>
+
+  <!-- PWA Install Button -->
+  <button class="pwa-btn" id="pwaLoginBtn" onclick="doPWAInstall()" style="display:none">
+    📲 <span data-en="Install App on your Phone" data-hi="अपने फ़ोन पर App इंस्टॉल करें">Install App on your Phone</span>
+  </button>
+
+  <!-- S1: Phone -->
+  <div class="lc" id="ls1">
+    <div style="font-size:15px;font-weight:900;color:var(--txt);margin-bottom:3px" data-en="Login with Mobile" data-hi="मोबाइल से लॉगिन">Login with Mobile</div>
+    <div style="font-size:11px;color:var(--mt);margin-bottom:14px;font-weight:600" data-en="OTP will be sent to your number" data-hi="आपके नंबर पर OTP भेजा जाएगा">OTP will be sent to your number</div>
+    <div class="l-err" id="lE1"></div>
+    <div style="display:flex;gap:8px;margin-bottom:11px">
+      <div style="padding:13px 10px;background:var(--crd2);border:1.5px solid var(--brd);border-radius:11px;color:var(--mt);font-size:15px;font-weight:800">+91</div>
+      <input class="l-inp" id="lPh" type="tel" inputmode="numeric" placeholder="10 digit mobile" maxlength="10" oninput="this.value=this.value.replace(/\D/g,'').slice(0,10)" style="flex:1;margin-bottom:0">
+    </div>
+    <button class="l-btn" onclick="sendOTP('login')" id="otpBtn" data-en="Send OTP →" data-hi="OTP भेजें →">Send OTP →</button>
+    <div class="l-divider"></div>
+    <div class="l-link" onclick="showMgrReg()" data-en="I'm a Manager — Register New Company" data-hi="मैं मैनेजर हूं — नई कंपनी रजिस्टर करें">I'm a Manager — Register New Company</div>
+    <div class="l-link" onclick="showStep('lsSA')" style="margin-top:6px;color:var(--prp)" data-en="Super Admin Login" data-hi="सुपर एडमिन लॉगिन">Super Admin Login</div>
+  </div>
+
+  <!-- S2: OTP -->
+  <div class="lc" id="ls2" style="display:none">
+    <div style="font-size:15px;font-weight:900;color:var(--txt);margin-bottom:3px" data-en="Verify OTP" data-hi="OTP सत्यापित करें">Verify OTP</div>
+    <div style="font-size:11px;color:var(--mt);margin-bottom:4px;font-weight:600" id="otpTo"></div>
+    <div class="l-err" id="lE2"></div>
+    <div class="otp-row" id="otpR">
+      <input class="otp-inp" maxlength="1" inputmode="numeric" oninput="otpN(this,0)" onfocus="this.select()">
+      <input class="otp-inp" maxlength="1" inputmode="numeric" oninput="otpN(this,1)" onfocus="this.select()">
+      <input class="otp-inp" maxlength="1" inputmode="numeric" oninput="otpN(this,2)" onfocus="this.select()">
+      <input class="otp-inp" maxlength="1" inputmode="numeric" oninput="otpN(this,3)" onfocus="this.select()">
+      <input class="otp-inp" maxlength="1" inputmode="numeric" oninput="otpN(this,4)" onfocus="this.select()">
+      <input class="otp-inp" maxlength="1" inputmode="numeric" oninput="otpN(this,5)" onfocus="this.select()">
+    </div>
+    <button class="l-btn grn" onclick="verifyOTP()" data-en="Verify →" data-hi="सत्यापित करें →">Verify →</button>
+    <div class="l-link" onclick="showStep('ls1')">← Back</div>
+  </div>
+
+  <!-- S3: Manager Reg -->
+  <div class="lc" id="ls3" style="display:none">
+    <div style="font-size:15px;font-weight:900;color:var(--txt);margin-bottom:3px" data-en="Register as Manager" data-hi="मैनेजर रजिस्ट्रेशन">Register as Manager</div>
+    <div style="font-size:11px;color:var(--mt);margin-bottom:14px;font-weight:600" data-en="Setup your company" data-hi="अपनी कंपनी सेटअप करें">Setup your company</div>
+    <div class="l-err" id="lE3"></div>
+    <input class="l-inp" id="rName" placeholder="Your Full Name">
+    <input class="l-inp" id="rComp" placeholder="Company Name">
+    <select class="l-inp" id="rInd"><option value="">Select Industry...</option><option value="manufacturing">Manufacturing</option><option value="it">IT / Software</option><option value="healthcare">Healthcare</option><option value="retail">Retail</option><option value="logistics">Logistics</option><option value="hospitality">Hospitality</option><option value="security">Security</option><option value="construction">Construction</option><option value="education">Education</option><option value="other">Other</option></select>
+    <button class="l-btn grn" onclick="doMgrReg()" data-en="Create Company →" data-hi="कंपनी बनाएं →">Create Company →</button>
+    <div class="l-link" onclick="showStep('ls1')">← Back</div>
+  </div>
+
+  <!-- S4: Setup Depts & Shifts -->
+  <div class="lc" id="ls4" style="display:none;max-height:78vh;overflow-y:auto">
+    <div style="font-size:15px;font-weight:900;color:var(--txt);margin-bottom:3px" data-en="Setup Departments & Shifts" data-hi="विभाग और शिफ्ट सेटअप">Setup Departments & Shifts</div>
+    <div style="font-size:11px;color:var(--mt);margin-bottom:12px;font-weight:600" data-en="Can be changed later in Settings" data-hi="बाद में सेटिंग्स में बदल सकते हैं">Can be changed later in Settings</div>
+    <div style="font-size:12px;font-weight:800;color:var(--acc);margin-bottom:6px">Departments</div>
+    <div id="sDL" style="margin-bottom:8px"></div>
+    <div style="display:flex;gap:6px;margin-bottom:14px">
+      <input class="l-inp" id="sDN" placeholder="Dept name" style="flex:1;margin:0">
+      <input type="color" id="sDC" value="#ea580c" style="width:42px;height:42px;border:none;border-radius:8px;cursor:pointer">
+      <button onclick="addSD()" style="padding:10px 14px;border-radius:10px;border:none;background:var(--acc);color:#fff;font-weight:800;cursor:pointer;font-size:18px">+</button>
+    </div>
+    <div style="font-size:12px;font-weight:800;color:var(--acc);margin-bottom:6px">Shift Types</div>
+    <div id="sSL" style="margin-bottom:8px"></div>
+    <div style="display:flex;gap:5px;margin-bottom:14px">
+      <input class="l-inp" id="sSC" placeholder="D" maxlength="4" style="width:48px;margin:0;text-align:center" oninput="this.value=this.value.toUpperCase()">
+      <input class="l-inp" id="sSLb" placeholder="Day Shift" style="flex:1;margin:0">
+      <input type="color" id="sSCo" value="#f59e0b" style="width:38px;height:38px;border:none;border-radius:7px;cursor:pointer">
+      <button onclick="addSS()" style="padding:8px 12px;border-radius:8px;border:none;background:var(--acc);color:#fff;font-weight:800;cursor:pointer">+</button>
+    </div>
+    <button class="l-btn" onclick="finishSetup()">Finish Setup & Enter App →</button>
+  </div>
+
+  <!-- SA Login -->
+  <div class="lc" id="lsSA" style="display:none">
+    <div style="font-size:15px;font-weight:900;color:var(--txt);margin-bottom:4px">🛡️ Super Admin</div>
+    <div style="font-size:11px;color:var(--mt);margin-bottom:12px;font-weight:600">Admin ID: 8929397949</div>
+    <div class="l-err" id="lESA"></div>
+    <input class="l-inp" id="saP" type="password" placeholder="Enter Password">
+    <!-- First-time setup: confirm password field (hidden by default) -->
+    <input class="l-inp" id="saPConfirm" type="password" placeholder="Confirm Password (first time only)" style="display:none">
+    <div id="saSetupNote" style="display:none;font-size:11px;color:var(--grn);font-weight:700;margin-bottom:10px;padding:8px;background:var(--grnBg);border-radius:8px">🔐 First time login — set your password now. You'll use this password every time.</div>
+    <button class="l-btn" onclick="doSALogin()" id="saBtnLogin" style="background:linear-gradient(135deg,#7c3aed,#6d28d9)">Login →</button>
+    <button class="l-btn grn" onclick="doSASetPassword()" id="saBtnSetup" style="display:none">Set Password & Login →</button>
+    <div class="l-link" onclick="showStep('ls1')">← Back</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ FINGERPRINT ═══ -->
+<div id="fpScr">
+  <svg class="mp-logo" width="56" height="56" viewBox="0 0 110 110" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="flg1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#f97316"/><stop offset="50%" stop-color="#a855f7"/><stop offset="100%" stop-color="#38bdf8"/></linearGradient><linearGradient id="flg2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#f97316"/><stop offset="100%" stop-color="#ea580c"/></linearGradient><linearGradient id="flg3" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#38bdf8"/><stop offset="100%" stop-color="#0369a1"/></linearGradient></defs><polygon points="55,4 100,28 100,82 55,106 10,82 10,28" fill="none" stroke="url(#flg1)" stroke-width="2" opacity=".4"/><polygon points="55,10 95,32 95,78 55,100 15,78 15,32" fill="rgba(13,22,35,.9)" stroke="url(#flg1)" stroke-width="1.5"/><text x="35" y="73" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="46" fill="url(#flg2)">M</text><text x="76" y="73" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="46" fill="url(#flg3)">P</text><circle cx="55" cy="57" r="4" fill="#f97316" opacity=".9"/></svg>
+  <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;color:var(--txt);margin-bottom:4px">Man Power</div>
+  <div style="font-size:10px;color:var(--mt);margin-bottom:22px;font-weight:600" id="fpComp">mp.vkstech.com</div>
+  <div class="fp-ring" onclick="tryFP()" id="fpRing">👆</div>
+  <div class="fp-t" id="fpT" data-en="Touch to Login" data-hi="लॉगिन के लिए टच करें">Touch to Login</div>
+  <div class="fp-s" id="fpS" data-en="Use your fingerprint" data-hi="अपना फ़िंगरप्रिंट लगाएं">Use your fingerprint</div>
+  <div id="fpUser" style="margin-top:12px;padding:7px 16px;background:var(--accBg);border:1px solid rgba(194,65,12,.2);border-radius:10px;font-size:13px;color:var(--acc);font-weight:800"></div>
+  <div class="fp-skip" onclick="skipFP()" data-en="Use OTP instead →" data-hi="OTP से लॉगिन →">Use OTP instead →</div>
+</div>
+
+<!-- ═══ HEADER ═══ -->
+<header class="hdr" id="mainHdr" style="display:none">
+  <div class="hdr-top">
+    <div class="hdr-brand"><span id="hdrN">Man Power</span></div>
+    <div class="hdr-r">
+      <div class="hdr-btn" id="langB" onclick="togLang()">हि</div>
+      <div class="hdr-btn" onclick="togTheme()" id="thB" title="Switch to Dark Mode">🌙</div>
+      <div class="noti-btn" id="notiBtn" onclick="openNotifs()" style="display:none">🔔<div class="noti-dot" id="notiDot" style="display:none">0</div></div>
+      <div class="u-chip" onclick="showProfile()">
+        <div class="u-av" id="uAv">?</div>
+        <div><div class="u-name" id="uNm">—</div><div class="role-t" id="uRl">user</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="sync-r" id="syncR">🔄 <span data-en="Live Sync" data-hi="लाइव सिंक">Live Sync</span> · <span id="syncT">—</span></div>
+  <nav class="nav" id="mainNav"></nav>
+</header>
+
+<!-- ═══ MAIN ═══ -->
+<div class="main" id="mainC" style="display:none">
+
+<!-- HOME --><div class="tab on" id="tab-home"><div class="pg-t" id="homeD"></div><div id="homeV"></div></div>
+
+<!-- SCHEDULE --><div class="tab" id="tab-schedule">
+  <div class="pg-t" data-en="Schedule" data-hi="शेड्यूल">Schedule</div>
+  <div class="sch-nav"><button onclick="mvW(-7)">‹</button><div class="sch-lbl" id="schL"></div><button onclick="mvW(7)">›</button></div>
+
+  <!-- UPLOAD SECTION — always visible for managers, directly on page -->
+  <div id="schUpload" style="background:var(--pnl);border:2px solid var(--brd);border-radius:14px;padding:16px;margin-bottom:14px">
+    <div style="font-size:15px;font-weight:900;color:var(--txt);margin-bottom:4px">📤 Upload Excel (Employees + Shifts)</div>
+    <div style="font-size:11px;color:var(--mt);margin-bottom:12px;line-height:1.5;font-weight:600">
+      Upload your Excel file with: <b style="color:var(--tx2)">S.No, Name, Designation, Employee Code, Mobile, W-OFF, 1, 2, 3...31</b><br>
+      Month is auto-detected from sheet name. Shift codes: D, N, O, L, G, Ab, HLF, C/O, GP etc.
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
+      <div style="flex:1">
+        <input type="month" id="xlMo" style="width:100%;padding:10px;background:var(--crd2);border:1px solid var(--brd);border-radius:8px;color:var(--txt);font-size:14px;font-family:var(--F);outline:none">
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <label style="flex:1;min-width:200px;padding:14px;background:var(--crd2);border:2px dashed var(--brd);border-radius:10px;text-align:center;cursor:pointer;font-size:13px;font-weight:700;color:var(--tx2)">
+        📊 Tap to select Excel file
+        <input type="file" id="xlF" accept=".xlsx,.xls,.csv" style="display:none" onchange="previewXL(this)">
+      </label>
+    </div>
+    <div id="xlPreview" style="display:none;margin-top:10px"></div>
+    <button class="btn-p" onclick="doXL()" id="xlBtn" style="display:none;margin-top:10px">✅ Upload & Process</button>
+  </div>
+
+  <!-- Other schedule controls -->
+  <div class="act-r" id="schAR">
+    <button class="btn-a" onclick="openAutoSch()">🤖 Auto Schedule Next Month</button>
+    <button class="btn-s" onclick="openAddE()">+ Add Employee Manually</button>
+  </div>
+  <div class="chips" id="schDF"></div>
+  <div id="schEmpty" style="display:none"></div>
+  <div class="sch-w"><table class="sch-t" id="schT"></table></div>
+  <div class="legend" id="schLg"></div>
+  <div id="autoB" style="display:none;margin-top:14px;background:var(--bluBg);border:1.5px solid rgba(37,99,235,.15);border-radius:var(--R);padding:14px">
+    <div style="font-size:13px;font-weight:900;color:var(--blu);margin-bottom:3px">🤖 Smart Auto-Scheduler</div>
+    <div style="font-size:11px;color:var(--mt);margin-bottom:10px;font-weight:600" id="autoI"></div>
+    <button class="btn-p" onclick="runAuto()" style="background:linear-gradient(135deg,#2563eb,#1d4ed8)">Generate Next Month</button>
+  </div>
+</div>
+
+<!-- LEAVE --><div class="tab" id="tab-leave">
+  <div class="pg-t" data-en="Leaves" data-hi="अवकाश">Leaves</div>
+  <div class="act-r"><button class="btn-a" onclick="openLvF()">+ New Leave</button><button class="btn-s" onclick="openResF()" style="border-color:rgba(220,38,38,.2);color:var(--red)">📝 Resignation</button></div>
+  <div class="chips" id="lvFC"><div class="chip on" onclick="sLvF('all',this)">All</div><div class="chip" onclick="sLvF('pending',this)">⏳ Pending</div><div class="chip" onclick="sLvF('approved',this)">✅ Approved</div><div class="chip" onclick="sLvF('rejected',this)">❌ Rejected</div></div>
+  <div id="lvL"></div>
+</div>
+
+<!-- REPORTS --><div class="tab" id="tab-reports">
+  <div class="pg-t" data-en="Reports" data-hi="रिपोर्ट">Reports</div>
+  <div class="pg-s" data-en="NCR, Absent, Warning, Appreciation" data-hi="NCR, अनुपस्थिति, चेतावनी, प्रशंसा">NCR, Absent, Warning, Appreciation</div>
+  <div class="act-r"><button class="btn-a" onclick="openRpF()">+ New Report</button></div>
+  <div class="chips" id="rpFC"><div class="chip on" onclick="sRpF('all',this)">All</div><div class="chip" onclick="sRpF('ncr',this)">⚠️ NCR</div><div class="chip" onclick="sRpF('absent',this)">📵 Absent</div><div class="chip" onclick="sRpF('warning',this)">⚡ Warning</div><div class="chip" onclick="sRpF('appreciation',this)">🌟 Praise</div></div>
+  <div id="rpL"></div>
+</div>
+
+<!-- TODO --><div class="tab" id="tab-todo">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:13px"><div><div class="pg-t" data-en="To-Do" data-hi="कार्य सूची">To-Do</div></div><button class="btn-a" onclick="openTdF()">+ New</button></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-bottom:13px">
+    <div class="stat-c"><div class="stat-v" style="color:var(--acc)" id="tdT">0</div><div class="stat-l">Total</div></div>
+    <div class="stat-c"><div class="stat-v" style="color:var(--blu)" id="tdP">0</div><div class="stat-l">Pending</div></div>
+    <div class="stat-c"><div class="stat-v" style="color:var(--grn)" id="tdD">0</div><div class="stat-l">Done</div></div>
+  </div>
+  <div class="chips" id="tdFC"><div class="chip on" onclick="sTdF('all',this)">All</div><div class="chip" onclick="sTdF('pending',this)">⏳</div><div class="chip" onclick="sTdF('done',this)">✅</div></div>
+  <div id="tdL"></div>
+</div>
+
+<!-- PENDING --><div class="tab" id="tab-pending"><div class="pg-t" data-en="Pending Approvals" data-hi="लंबित अनुमोदन">Pending Approvals</div><div style="font-size:13px;font-weight:800;color:var(--tx2);margin:10px 0 7px">🌴 Leave Requests</div><div id="pLv"></div></div>
+
+<!-- TEAM --><div class="tab" id="tab-team">
+  <div class="pg-t" data-en="Team" data-hi="टीम">Team</div>
+  <div class="act-r" id="tmAR" style="display:none"><button class="btn-a" onclick="openAddE()">+ Add Employee</button><button class="btn-s" onclick="openXL()">📤 Excel</button></div>
+  <div style="position:relative;margin-bottom:10px"><span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:14px">🔍</span><input type="text" placeholder="Search..." oninput="rTeam(this.value)" style="width:100%;padding:11px 13px 11px 34px;background:var(--crd2);border:1px solid var(--brd);border-radius:11px;color:var(--txt);font-size:13px;font-family:var(--F);outline:none"></div>
+  <div class="chips" id="tmDF"></div>
+  <div id="tmL"></div>
+</div>
+
+<!-- INSTRUCTIONS --><div class="tab" id="tab-inst">
+  <div class="pg-t" data-en="Instructions & Rules" data-hi="निर्देश और नियम">Instructions & Rules</div>
+  <div class="act-r" id="inAR" style="display:none"><button class="btn-a" onclick="openAddIn()">+ Add</button></div>
+  <div id="inL"></div>
+</div>
+
+<!-- SA DASHBOARD --><div class="tab" id="tab-sa">
+  <div class="pg-t">🛡️ Super Admin Dashboard</div>
+  <div class="pg-s">All managers, workers & analytics</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+    <div class="sa-c"><div class="stat-v" style="color:var(--acc)" id="saMgr">0</div><div class="stat-l">Managers</div></div>
+    <div class="sa-c"><div class="stat-v" style="color:var(--blu)" id="saWkr">0</div><div class="stat-l">Workers</div></div>
+    <div class="sa-c"><div class="stat-v" style="color:var(--grn)" id="saCo">0</div><div class="stat-l">Companies</div></div>
+    <div class="sa-c"><div class="stat-v" style="color:var(--prp)" id="saAct">0</div><div class="stat-l">Total Users</div></div>
+  </div>
+  <div style="font-size:14px;font-weight:900;color:var(--txt);margin-bottom:8px">All Managers & Teams</div>
+  <div id="saML"></div>
+</div>
+
+</div>
+
+<!-- MODAL --><div class="ov" id="ov" onclick="closeM()"><div class="modal-box" id="mB" onclick="event.stopPropagation()"></div></div>
+<!-- TOAST --><div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════
+// MAN POWER — COMPLETE APP LOGIC
+// mp.vkstech.com
+// ═══════════════════════════════════════════
+
+let S={},CO={},LANG=localStorage.getItem('mp_lang')||'en';
+let _c={e:[],lv:[],rp:[],td:[],sh:{},ins:[],nf:[]};
+let _tab='home',_wk=null,_lvF='all',_rpF='all',_tdF='all',_dF='ALL';
+let _otpPur='',_otpPh='',_sD=[],_sS=[];
+
+// ─── Utils ───
+const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000)}
+function $(id){return document.getElementById(id)}
+function ds(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function T(en,hi){return LANG==='hi'?hi:en}
+function uSync(){const e=$('syncT');if(e)e.textContent=new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})}
+
+// ─── Firebase ───
+async function fG(p){const s=await window._fb('g',p);return s.exists()?s.val():null}
+async function fS(p,v){await window._fb('s',p,v);uSync()}
+async function fP(p,v){const r=await window._fb('p',p,v);uSync();return r.key}
+async function fU(p,v){await window._fb('u',p,v);uSync()}
+async function fR(p){await window._fb('r',p);uSync()}
+function fL(p,cb){window._fb('l',p,s=>{cb(s.exists()?s.val():null)})}
+function mp(p){return'managers/'+(S.mid||'_')+'/'+p}
+async function mG(p){return fG(mp(p))}async function mS(p,v){return fS(mp(p),v)}
+async function mP(p,v){return fP(mp(p),v)}async function mU(p,v){return fU(mp(p),v)}
+async function mR(p){return fR(mp(p))}function mL(p,cb){fL(mp(p),cb)}
+
+// ─── Hash ───
+async function H(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+
+// ─── Roles ───
+function isA(){return S.role==='manager'||S.role==='superadmin'||S.role==='teamlead'}
+function isM(){return S.role==='manager'}
+function isTL(){return S.role==='teamlead'}
+function isSA(){return S.role==='superadmin'}
+function isW(){return S.role==='worker'}
+function canEditShift(){return S.role==='manager'||S.role==='teamlead'}
+function canAddRemove(){return S.role==='manager'}
+function gE(){return _c.e||[]}
+
+// ─── Session ───
+function saveS(){S.at=S.at||new Date().toISOString();try{localStorage.setItem('mp_s',btoa(unescape(encodeURIComponent(JSON.stringify(S)))))}catch(e){}}
+function loadS(){try{const s=localStorage.getItem('mp_s');if(s){const d=JSON.parse(decodeURIComponent(escape(atob(s))));if(d&&d.role){S=d;return true}}}catch(e){}return false}
+function clrS(){S={};try{localStorage.removeItem('mp_s');localStorage.removeItem('fp_c')}catch(e){}}
+
+// ─── Lang ───
+function togLang(){LANG=LANG==='en'?'hi':'en';localStorage.setItem('mp_lang',LANG);$('langB').textContent=LANG==='en'?'हि':'EN';document.querySelectorAll('[data-en]').forEach(e=>{e.innerHTML=LANG==='en'?e.dataset.en:(e.dataset.hi||e.dataset.en)});rAll()}
+
+// ─── Theme ───
+function togTheme(){document.body.classList.toggle('dark');const d=document.body.classList.contains('dark');$('thB').textContent=d?'☀️':'🌙';$('thB').title=d?'Switch to Light Mode':'Switch to Dark Mode';localStorage.setItem('mp_th',d?'d':'l')}
+if(localStorage.getItem('mp_th')==='d')document.body.classList.add('dark');
+
+// ─── Login UI ───
+function showStep(id){['ls1','ls2','ls3','ls4','lsSA'].forEach(x=>{const e=$(x);if(e)e.style.display='none'});const e=$(id);if(e)e.style.display='block';if(id==='lsSA')checkSASetup()}
+function showMgrReg(){_otpPur='mgrReg';showStep('ls1');$('lPh').focus()}
+function showErr(n,m){const ids={1:'lE1',2:'lE2',3:'lE3',sa:'lESA'};const e=$(ids[n]);if(e){e.textContent=m;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),4000)}}
+
+// ─── OTP ───
+async function sendOTP(pur){
+  const ph=$('lPh').value.trim();if(ph.length!==10){showErr(1,T('Enter 10 digit number','10 अंक दर्ज करें'));return}
+  _otpPh=ph;
+  if(pur==='login'){const mg=await fG('mgrIdx/'+ph);const wk=await fG('wkrIdx/'+ph);_otpPur=(!mg&&!wk)?'mgrReg':'login'}else{_otpPur=pur}
+  const btn=$('otpBtn');btn.textContent='⏳ Sending...';btn.disabled=true;
+  try{const r=await window._otp('+91'+ph);
+    if(r.ok){$('otpTo').textContent=T('OTP sent to +91-'+ph,'OTP भेजा गया +91-'+ph);showStep('ls2');setTimeout(()=>{const i=document.querySelectorAll('#otpR .otp-inp');if(i[0])i[0].focus()},200)}
+    else showErr(1,'Error: '+(r.e||'Failed'))
+  }catch(e){showErr(1,'Error: '+e.message)}
+  btn.textContent=T('Send OTP →','OTP भेजें →');btn.disabled=false;
+}
+function otpN(el,i){if(el.value.length===1){const a=document.querySelectorAll('#otpR .otp-inp');if(a[i+1])a[i+1].focus()}}
+async function verifyOTP(){
+  const code=[...document.querySelectorAll('#otpR .otp-inp')].map(i=>i.value).join('');
+  if(code.length!==6){showErr(2,T('Enter 6 digits','6 अंक दर्ज करें'));return}
+  try{await window._vfy(code);toast('✅ '+T('Verified!','सत्यापित!'));
+    if(_otpPur==='mgrReg'){const ex=await fG('mgrIdx/'+_otpPh);if(ex){await loginMgr(ex)}else showStep('ls3')}
+    else{const mid=await fG('mgrIdx/'+_otpPh);if(mid){await loginMgr(mid);return}
+      const wi=await fG('wkrIdx/'+_otpPh);if(wi){await loginWkr(wi);return}showStep('ls3')}
+  }catch(e){showErr(2,T('Wrong OTP','गलत OTP'))}
+}
+
+// ─── Manager Login/Reg ───
+async function loginMgr(mid){
+  const p=await fG('managers/'+mid+'/profile');if(!p){showErr(2,'Not found');return}
+  const cfg=await fG('managers/'+mid+'/config');
+  S={role:'manager',name:p.name,phone:p.phone,mid,company:p.company,industry:p.industry,at:new Date().toISOString()};
+  CO={depts:cfg?.departments||{},shifts:cfg?.shiftTypes||{}};saveS();
+  if(!Object.keys(CO.depts).length){initSD();showStep('ls4');return}
+  launch();setTimeout(()=>regFP(),1500);
+}
+async function doMgrReg(){
+  const n=$('rName').value.trim(),c=$('rComp').value.trim(),ind=$('rInd').value;
+  if(!n||!c||!ind){showErr(3,T('Fill all fields','सभी भरें'));return}
+  try{const mid='m_'+Date.now();
+    await fS('managers/'+mid+'/profile',{name:n,phone:_otpPh,company:c,industry:ind,createdAt:new Date().toISOString()});
+    await fS('mgrIdx/'+_otpPh,mid);
+    S={role:'manager',name:n,phone:_otpPh,mid,company:c,industry:ind,at:new Date().toISOString()};CO={depts:{},shifts:{}};saveS();initSD();showStep('ls4');
+  }catch(e){showErr(3,'Error: '+e.message)}
+}
+
+// ─── Setup ───
+function initSD(){_sD=[];_sS=[{c:'D',l:'Day',co:'#f59e0b'},{c:'N',l:'Night',co:'#818cf8'},{c:'O',l:'Off',co:'#94a3b8'},{c:'L',l:'Leave',co:'#ef4444'},{c:'G',l:'General',co:'#3b82f6'},{c:'HLF',l:'Half Day',co:'#fb923c'},{c:'Ab',l:'Absent',co:'#dc2626'}];rSD();rSS()}
+function rSD(){$('sDL').innerHTML=_sD.length?_sD.map((d,i)=>`<div style="display:flex;align-items:center;gap:7px;padding:7px 8px;background:var(--crd2);border:1px solid var(--brd);border-radius:8px;margin-bottom:5px"><div style="width:14px;height:14px;border-radius:3px;background:${d.co}"></div><div style="flex:1;font-size:13px;font-weight:800;color:var(--txt)">${esc(d.n)}</div><button onclick="_sD.splice(${i},1);rSD()" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:14px">✕</button></div>`).join(''):'<div style="text-align:center;padding:14px;color:var(--mt2);font-size:12px;font-weight:600">Add at least 1 department</div>'}
+function addSD(){const n=$('sDN').value.trim(),c=$('sDC').value;if(!n)return;_sD.push({n,co:c,k:n.toUpperCase().replace(/\s+/g,'_').slice(0,12)});$('sDN').value='';rSD()}
+function rSS(){$('sSL').innerHTML=_sS.map((s,i)=>`<span style="display:inline-flex;align-items:center;gap:3px;padding:3px 8px;border-radius:6px;background:${s.co}15;border:1px solid ${s.co}30;margin:0 3px 5px 0;font-size:10px;font-weight:800;color:${s.co}">${esc(s.c)} <span style="color:var(--mt)">${esc(s.l)}</span><button onclick="_sS.splice(${i},1);rSS()" style="background:none;border:none;color:var(--mt2);cursor:pointer;font-size:9px;margin-left:2px">✕</button></span>`).join('')}
+function addSS(){const c=$('sSC').value.trim(),l=$('sSLb').value.trim(),co=$('sSCo').value;if(!c||!l)return;if(_sS.find(s=>s.c===c)){toast('Code exists');return}_sS.push({c,l,co});$('sSC').value='';$('sSLb').value='';rSS()}
+async function finishSetup(){if(!_sD.length){toast(T('Add 1+ department','1+ विभाग जोड़ें'));return}if(_sS.length<2){toast('Add 2+ shift types');return}
+  const dp={},sh={};_sD.forEach(d=>{dp[d.k]={name:d.n,color:d.co}});_sS.forEach(s=>{sh[s.c]={label:s.l,color:s.co}});
+  try{await mS('config/departments',dp);await mS('config/shiftTypes',sh);CO.depts=dp;CO.shifts=sh;toast('✅ Setup complete!');launch();setTimeout(()=>regFP(),1500)}catch(e){toast('Error: '+e.message)}}
+
+// ─── Worker Login ───
+async function loginWkr(wi){
+  const p=await fG('managers/'+wi.managerId+'/profile'),e=await fG('managers/'+wi.managerId+'/employees/'+wi.empId),cfg=await fG('managers/'+wi.managerId+'/config');
+  if(!e){showErr(2,'Employee not found');return}
+  // Check if this employee is a Team Lead
+  const role=e.isTeamLead?'teamlead':'worker';
+  S={role,name:e.name,phone:_otpPh,mid:wi.managerId,eid:wi.empId,company:p?.company||'',at:new Date().toISOString()};
+  CO={depts:cfg?.departments||{},shifts:cfg?.shiftTypes||{}};saveS();launch();setTimeout(()=>regFP(),1500);
+}
+
+// ─── Super Admin (ID: 8929397949, password stored in Firebase) ───
+async function doSALogin(){
+  const p=$('saP').value.trim();if(!p){showErr('sa',T('Enter password','पासवर्ड दर्ज करें'));return}
+  try{
+    // Check if SA password exists in Firebase
+    const stored=await fG('superadmin/passHash');
+    if(!stored){
+      // First time — show setup UI
+      $('saPConfirm').style.display='';$('saSetupNote').style.display='';
+      $('saBtnLogin').style.display='none';$('saBtnSetup').style.display='';
+      showErr('sa',T('First time — set your password below','पहली बार — नीचे पासवर्ड सेट करें'));return
+    }
+    // Verify password
+    const ph=await H(p);
+    if(ph!==stored){showErr('sa',T('Wrong password','गलत पासवर्ड'));return}
+    S={role:'superadmin',name:'Super Admin',saId:'8929397949',at:new Date().toISOString()};saveS();launch();
+  }catch(e){showErr('sa','Error: '+e.message)}
+}
+async function doSASetPassword(){
+  const p=$('saP').value.trim(),p2=$('saPConfirm').value.trim();
+  if(!p||p.length<4){showErr('sa',T('Password must be 4+ characters','पासवर्ड 4+ अक्षर'));return}
+  if(p!==p2){showErr('sa',T('Passwords do not match','पासवर्ड मेल नहीं खाते'));return}
+  try{
+    const ph=await H(p);await fS('superadmin/passHash',ph);await fS('superadmin/id','8929397949');await fS('superadmin/createdAt',new Date().toISOString());
+    S={role:'superadmin',name:'Super Admin',saId:'8929397949',at:new Date().toISOString()};saveS();toast('✅ '+T('Password set successfully!','पासवर्ड सेट हो गया!'));launch();
+  }catch(e){showErr('sa','Error: '+e.message)}
+}
+// Auto-check on SA panel open
+async function checkSASetup(){
+  try{const stored=await fG('superadmin/passHash');
+    if(!stored){$('saPConfirm').style.display='';$('saSetupNote').style.display='';$('saBtnLogin').style.display='none';$('saBtnSetup').style.display=''}
+    else{$('saPConfirm').style.display='none';$('saSetupNote').style.display='none';$('saBtnLogin').style.display='';$('saBtnSetup').style.display='none'}
+  }catch(e){}}
+
+
+// ─── Fingerprint ───
+async function regFP(){if(!window.PublicKeyCredential)return;try{const uid=S.phone||S.name||'u';
+  const cr=await navigator.credentials.create({publicKey:{challenge:new Uint8Array(32),rp:{name:'Man Power'},user:{id:new TextEncoder().encode(uid),name:uid,displayName:S.name||'User'},pubKeyCredParams:[{type:'public-key',alg:-7}],authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required'},timeout:60000}});
+  if(cr){localStorage.setItem('fp_c',JSON.stringify({id:[...new Uint8Array(cr.rawId)],t:cr.type}));localStorage.setItem('fp_u',btoa(unescape(encodeURIComponent(JSON.stringify(S)))))}
+}catch(e){}}
+
+function showFP(){$('fpScr').classList.add('show');$('fpComp').textContent=S.company||'mp.vkstech.com';$('fpUser').textContent=S.name||''}
+async function tryFP(){const cd=localStorage.getItem('fp_c');if(!cd)return skipFP();
+  try{const cr=JSON.parse(cd);const a=await navigator.credentials.get({publicKey:{challenge:new Uint8Array(32),allowCredentials:[{id:new Uint8Array(cr.id),type:'public-key'}],userVerification:'required',timeout:60000}});
+    if(a){const su=localStorage.getItem('fp_u');if(su)S=JSON.parse(decodeURIComponent(escape(atob(su))));saveS();$('fpScr').classList.remove('show');if(S.mid){const cfg=await fG('managers/'+S.mid+'/config');CO={depts:cfg?.departments||{},shifts:cfg?.shiftTypes||{}}}launch()}
+  }catch(e){$('fpT').textContent=T('Try again or use OTP','पुनः प्रयास करें')}}
+function skipFP(){$('fpScr').classList.remove('show');$('loginScr').classList.add('show');showStep('ls1')}
+
+// ═══ LAUNCH ═══
+async function launch(){
+  $('loader').style.display='none';$('loginScr').classList.remove('show');$('loginScr').style.display='none';$('fpScr').classList.remove('show');$('fpScr').style.display='none';
+  $('mainHdr').style.display='';$('mainC').style.display='';
+  if(S.mid&&(!CO.depts||!Object.keys(CO.depts).length)){try{const cfg=await mG('config');CO={depts:cfg?.departments||{},shifts:cfg?.shiftTypes||{}}}catch(e){}}
+  $('hdrN').textContent=S.company||'Man Power';$('uNm').textContent=S.name||'—';$('uAv').textContent=(S.name||'?').charAt(0).toUpperCase();
+  const r=$('uRl');r.textContent=S.role==='teamlead'?'Team Lead':S.role;r.className='role-t '+(isSA()?'sa':isM()?'mgr':isTL()?'teamlead':'wkr');
+  $('langB').textContent=LANG==='en'?'हि':'EN';bNav();initW();if(!isSA())initL();if(isSA())loadSA();goTab('home');
+}
+
+// ─── Nav ───
+function bNav(){const all=[{id:'home',i:'🏠',en:'Home',hi:'होम',r:['manager','worker','teamlead','superadmin']},{id:'schedule',i:'📅',en:'Schedule',hi:'शेड्यूल',r:['manager','worker','teamlead']},{id:'leave',i:'🏖️',en:'Leaves',hi:'अवकाश',r:['manager','worker','teamlead']},{id:'reports',i:'📋',en:'Reports',hi:'रिपोर्ट',r:['manager','worker','teamlead']},{id:'todo',i:'✅',en:'To-Do',hi:'कार्य',r:['manager','worker','teamlead']},{id:'pending',i:'⏳',en:'Pending',hi:'लंबित',r:['manager']},{id:'team',i:'👥',en:'Team',hi:'टीम',r:['manager','teamlead']},{id:'inst',i:'📌',en:'Rules',hi:'नियम',r:['manager','worker','teamlead']},{id:'sa',i:'🛡️',en:'Admin',hi:'एडमिन',r:['superadmin']}];
+  const tabs=all.filter(t=>t.r.includes(S.role));$('mainNav').innerHTML=tabs.map((t,i)=>`<button class="nb${i===0?' on':''}" id="nb-${t.id}" onclick="goTab('${t.id}')"><span class="nb-i">${t.i}</span><span>${LANG==='hi'?t.hi:t.en}</span>${t.id==='pending'?'<span class="nb-b" id="pBdg" style="display:none">0</span>':''}</button>`).join('')}
+function goTab(t){_tab=t;document.querySelectorAll('.tab').forEach(e=>e.classList.remove('on'));const e=$('tab-'+t);if(e)e.classList.add('on');document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));const b=$('nb-'+t);if(b)b.classList.add('on');try{if(t==='home')rHome();if(t==='schedule')rSch();if(t==='leave')rLvs();if(t==='reports')rRps();if(t==='todo')rTds();if(t==='team')rTeam();if(t==='pending')rPend();if(t==='inst')rInst()}catch(err){console.error('goTab render error:',err)}}
+
+// ─── Modal ───
+function openM(h){$('mB').innerHTML=h;$('ov').classList.add('open')}
+function closeM(){$('ov').classList.remove('open')}
+
+// ─── Listeners ───
+function initW(){const t=new Date();t.setHours(0,0,0,0);_wk=new Date(t);_wk.setDate(t.getDate()-t.getDay())}
+function mvW(d){_wk.setDate(_wk.getDate()+d);rSch()}
+function initL(){mL('employees',v=>{_c.e=v?Object.values(v):[];rAll()});mL('leaves',v=>{_c.lv=v?Object.entries(v).map(([k,l])=>({...l,_k:k})):[];rAll()});mL('reports',v=>{_c.rp=v?Object.entries(v).map(([k,r])=>({...r,_k:k})):[];rAll()});mL('todos',v=>{_c.td=v?Object.entries(v).map(([k,t])=>({...t,_k:k})):[];rAll()});mL('shifts',v=>{_c.sh=v||{};rAll()});mL('instructions',v=>{_c.ins=v?Object.entries(v).map(([k,i])=>({...i,_k:k})):[];rAll()});
+  // Notification listener — personal to current user
+  const nfKey=S.eid||S.mid||S.phone||'';
+  if(nfKey)mL('notifs/'+nfKey,v=>{_c.nf=v?Object.entries(v).map(([k,n])=>({...n,_k:k})).sort((a,b)=>(b.at||'').localeCompare(a.at||'')):[];updNotifBadge()})
+}
+function rAll(){try{rHome();if(_tab==='schedule')rSch();if(_tab==='leave')rLvs();if(_tab==='reports')rRps();if(_tab==='todo')rTds();if(_tab==='team')rTeam();if(_tab==='pending')rPend();if(_tab==='inst')rInst();const pc=_c.lv.filter(l=>l.status==='pending').length;const b=$('pBdg');if(b){b.style.display=pc?'':'none';b.textContent=pc};updNotifBadge()}catch(e){console.error('rAll error:',e)}}
+
+// ═══ NOTIFICATIONS ═══
+function updNotifBadge(){
+  const btn=$('notiBtn'),dot=$('notiDot');if(!btn)return;
+  btn.style.display=isSA()?'none':'';
+  const unread=_c.nf.filter(n=>!n.read).length;
+  if(dot){dot.style.display=unread>0?'':'none';dot.textContent=unread>9?'9+':unread}
+}
+
+async function pushNotif(empKey,title,body,icon,type){
+  if(!empKey)return;
+  try{await mP('notifs/'+empKey,{title,body,icon:icon||'📋',type:type||'info',read:false,by:S.name||'System',at:new Date().toISOString()})}catch(e){console.warn('Notif push err:',e)}
+}
+
+function openNotifs(){
+  const list=_c.nf;
+  const html=`<div class="m-handle"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <div class="m-title" style="margin-bottom:0">🔔 ${T('Notifications','सूचनाएं')}</div>
+      ${list.some(n=>!n.read)?`<button onclick="markAllRead()" style="font-size:11px;font-weight:700;color:var(--blu);background:none;border:none;cursor:pointer">${T('Mark all read','सभी पढ़ें')}</button>`:''}
+    </div>
+    <div class="noti-panel">
+      ${list.length?list.slice(0,30).map(n=>`<div class="noti-item${n.read?'':' unread'}">
+        <div class="noti-ico" style="background:${n.type==='shift'?'var(--accBg)':n.type==='leave_approved'?'var(--grnBg)':n.type==='leave_rejected'?'var(--redBg)':'var(--bluBg)'}">${esc(n.icon||'📋')}</div>
+        <div class="noti-body">
+          <div class="noti-title">${esc(n.title)}</div>
+          <div class="noti-desc">${esc(n.body)}</div>
+          <div class="noti-time">${n.by?T('By ','')+''+esc(n.by)+' · ':''}${timeAgo(n.at)}</div>
+        </div>
+      </div>`).join(''):`<div class="empty"><div class="empty-i">🔔</div><div class="empty-t">${T('No notifications yet','अभी कोई सूचना नहीं')}</div></div>`}
+    </div>`;
+  openM(html);
+  // Mark visible as read after 1.5s
+  setTimeout(()=>markAllRead(),1500);
+}
+
+async function markAllRead(){
+  const nfKey=S.eid||S.mid||S.phone||'';if(!nfKey)return;
+  const unread=_c.nf.filter(n=>!n.read);
+  for(const n of unread){try{await mU('notifs/'+nfKey+'/'+n._k,{read:true})}catch(e){}}
+}
+
+function timeAgo(dateStr){
+  if(!dateStr)return'';
+  const diff=Date.now()-new Date(dateStr).getTime();
+  const mins=Math.floor(diff/60000);
+  if(mins<1)return T('Just now','अभी');
+  if(mins<60)return mins+T(' min ago',' मिनट पहले');
+  const hrs=Math.floor(mins/60);
+  if(hrs<24)return hrs+T(' hr ago',' घंटे पहले');
+  const days=Math.floor(hrs/24);
+  if(days<7)return days+T(' day ago',' दिन पहले');
+  return new Date(dateStr).toLocaleDateString('en-IN',{day:'numeric',month:'short'});
+}
+
+// ═══ HOME ═══
+function rHome(){try{const t=new Date();const dn=LANG==='hi'?['रवि','सोम','मंगल','बुध','गुरु','शुक्र','शनि']:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];const mn=LANG==='hi'?['जन','फर','मार्च','अप्रैल','मई','जून','जुला','अग','सित','अक्टू','नव','दिस']:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  $('homeD').textContent=dn[t.getDay()]+', '+t.getDate()+' '+mn[t.getMonth()]+' '+t.getFullYear();
+  if(isSA()){$('homeV').innerHTML='<div class="crd" onclick="goTab(\'sa\')" style="cursor:pointer"><div class="crd-n">🛡️ Super Admin Dashboard</div><div class="crd-s">View all managers & workers</div></div>';return}
+  const emps=gE().filter(e=>e.status!=='left'),tk=ds(t);
+  if(isM()||isTL()){
+    if(!emps.length){
+      $('homeV').innerHTML=`<div style="text-align:center;padding:30px 16px">
+        <div style="font-size:48px;margin-bottom:10px">👋</div>
+        <div style="font-size:18px;font-weight:900;color:var(--txt);margin-bottom:6px">${T('Welcome, '+S.name+'!','स्वागत है, '+S.name+'!')}</div>
+        <div style="font-size:13px;color:var(--mt);margin-bottom:20px;line-height:1.6;font-weight:600">${T('Start by uploading your Excel file with employee details and shift schedule.','कर्मचारी विवरण और शिफ्ट शेड्यूल के साथ एक्सेल फ़ाइल अपलोड करके शुरू करें।')}</div>
+        <button class="btn-a" onclick="openXL()" style="font-size:14px;padding:14px 28px;border-radius:14px">📤 ${T('Upload Excel File','एक्सेल अपलोड करें')}</button>
+        <div style="margin-top:14px"><button class="btn-s" onclick="goTab('team')" style="font-size:12px">or ${T('Add Employees Manually','कर्मचारी मैन्युअली जोड़ें')}</button></div>
+      </div>`;return;
+    }
+    let oD=0,oL=0,ab=0;emps.forEach(e=>{const s=_c.sh[tk]?.[e.id];if(!s||s==='O')return;if(s==='L')oL++;else if(s==='Ab')ab++;else oD++});
+    $('homeV').innerHTML=`<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:7px;margin-bottom:14px"><div class="stat-c"><div class="stat-v" style="color:var(--acc)">${emps.length}</div><div class="stat-l">${T('Total','कुल')}</div></div><div class="stat-c"><div class="stat-v" style="color:var(--grn)">${oD}</div><div class="stat-l">${T('On Duty','ड्यूटी')}</div></div><div class="stat-c"><div class="stat-v" style="color:var(--blu)">${oL}</div><div class="stat-l">${T('Leave','छुट्टी')}</div></div><div class="stat-c"><div class="stat-v" style="color:var(--red)">${ab}</div><div class="stat-l">${T('Absent','अनुपस्थित')}</div></div></div>
+      <div class="crd" onclick="goTab('todo')" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between"><div><div class="crd-n">✅ ${T('Pending Tasks','बाकी कार्य')}</div></div><div class="stat-v" style="font-size:22px;color:var(--acc)">${_c.td.filter(t=>!t.done).length}</div></div>
+      ${isM()?`<div class="crd" onclick="goTab('pending')" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between"><div><div class="crd-n">⏳ ${T('Pending Approvals','लंबित')}</div></div><div class="stat-v" style="font-size:22px;color:var(--blu)">${_c.lv.filter(l=>l.status==='pending').length}</div></div>`:''}`
+  }else{const y=t.getFullYear(),m=t.getMonth(),dim=new Date(y,m+1,0).getDate(),sh=CO.shifts||{};
+    let cal='<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:10px">';const dl=LANG==='hi'?['र','सो','मं','बु','गु','शु','श']:['S','M','T','W','T','F','S'];dl.forEach(d=>{cal+=`<div style="text-align:center;font-size:9px;color:var(--mt);font-weight:700">${d}</div>`});
+    const fd=new Date(y,m,1).getDay();for(let i=0;i<fd;i++)cal+='<div></div>';
+    for(let d=1;d<=dim;d++){const dss=ds(new Date(y,m,d)),sv=_c.sh[dss]?.[S.eid]||'',st=sh[sv]||{},isT=d===t.getDate();cal+=`<div style="text-align:center;padding:5px 1px;border-radius:7px;${isT?'border:2px solid var(--acc);':''}background:${st.color?st.color+'12':'transparent'}"><div style="font-size:10px;color:var(--mt)">${d}</div><div style="font-size:10px;font-weight:800;color:${st.color||'var(--mt2)'}">${sv||'—'}</div></div>`}cal+='</div>';
+    $('homeV').innerHTML=`<div style="font-size:13px;font-weight:900;color:var(--tx2);margin-bottom:7px">${T('My Shift Calendar','मेरा शिफ्ट कैलेंडर')}</div><div class="crd">${cal}</div><div class="crd" onclick="goTab('todo')" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between"><div class="crd-n">✅ ${T('My Tasks','मेरे कार्य')}</div><div class="stat-v" style="font-size:22px;color:var(--acc)">${_c.td.filter(t=>!t.done&&(!t.to||t.to===S.eid)).length}</div></div>`}
+}catch(e){console.error('rHome error:',e);$('homeV').innerHTML=`<div style="text-align:center;padding:30px"><div style="font-size:40px;margin-bottom:10px">👋</div><div style="font-size:16px;font-weight:800;color:var(--txt);margin-bottom:8px">Welcome, ${esc(S.name||'Manager')}!</div><div style="font-size:13px;color:var(--mt);margin-bottom:16px">Go to <b>Schedule</b> tab to upload your Excel file.</div><button class="btn-a" onclick="goTab('schedule')" style="padding:12px 24px;font-size:14px">📅 Go to Schedule</button></div>`}}
+
+// ═══ SCHEDULE ═══
+function rSch(){try{if(!_wk)initW();const sh=CO.shifts||{},dp=CO.depts||{},emps=gE().filter(e=>e.status!=='left');
+  const ws=new Date(_wk),we=new Date(ws);we.setDate(ws.getDate()+6);const mn=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  $('schL').textContent=ws.getDate()+' '+mn[ws.getMonth()]+' — '+we.getDate()+' '+mn[we.getMonth()]+' '+we.getFullYear();
+  // Set default month on month picker
+  const now=new Date();const moEl=$('xlMo');if(moEl&&!moEl.value)moEl.value=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+  // Show/hide upload & admin controls based on role
+  const upEl=$('schUpload');if(upEl)upEl.style.display=canEditShift()?'':'none';
+  if(!canEditShift()){$('schAR').style.display='none'}
+  // Show/hide empty state based on employee count
+  const emptyEl=$('schEmpty');
+  if(emps.length>0){
+    if(emptyEl)emptyEl.style.display='none';
+  }else{
+    if(emptyEl)emptyEl.style.display='';
+    $('schT').innerHTML='';$('schLg').innerHTML='';$('schDF').innerHTML='';
+    return;
+  }
+  $('schDF').innerHTML=`<div class="chip${_dF==='ALL'?' on':''}" onclick="_dF='ALL';rSch();this.parentNode.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));this.classList.add('on')">${T('All','सभी')}</div>`+Object.entries(dp).map(([k,d])=>`<div class="chip${_dF===k?' on':''}" onclick="_dF='${k}';rSch();this.parentNode.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));this.classList.add('on')">${esc(d.name)}</div>`).join('');
+  const days=[];const dL=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];for(let i=0;i<7;i++){const d=new Date(ws);d.setDate(ws.getDate()+i);days.push({d,s:ds(d),dy:dL[d.getDay()],n:d.getDate()})}
+  const fl=_dF==='ALL'?emps:emps.filter(e=>e.dept===_dF);
+  let h='<thead><tr><th style="text-align:left;min-width:95px">'+T('Employee','कर्मचारी')+'</th>';
+  days.forEach(d=>{const isT=d.s===ds(new Date());h+=`<th style="${isT?'color:var(--acc);font-weight:900;':''}">${d.dy}<br>${d.n}</th>`});h+='</tr></thead><tbody>';
+  const grp={};fl.forEach(e=>{const k=e.dept||'OTH';if(!grp[k])grp[k]=[];grp[k].push(e)});
+  Object.entries(grp).forEach(([dk,el])=>{const dept=dp[dk]||{name:dk,color:'#64748b'};h+=`<tr class="sec-r"><td colspan="${days.length+1}"><span class="sec-r-l" style="color:${dept.color}">${esc(dept.name)} (${el.length})</span></td></tr>`;
+    el.forEach(e=>{h+=`<tr><td class="e-nm">${esc(e.name)}</td>`;days.forEach(d=>{const sc=_c.sh[d.s]?.[e.id]||'';const st=sh[sc]||{};h+=`<td><div class="shc" style="background:${st.color?st.color+'18':'transparent'};color:${st.color||'var(--mt)'}" ${canEditShift()?`onclick="cyc('${e.id}','${d.s}')"`:''}>${esc(sc)||'—'}</div></td>`});h+='</tr>'})});
+  h+='</tbody>';$('schT').innerHTML=h;
+  $('schLg').innerHTML=Object.entries(sh).map(([c,s])=>`<div class="leg"><span class="shc" style="background:${s.color}18;color:${s.color}">${c}</span>${esc(s.label)}</div>`).join('');
+  const nm=new Date(),nxM=new Date(nm.getFullYear(),nm.getMonth()+1,1);$('autoI').textContent=T('Analyzes current month patterns → generates '+mn[nxM.getMonth()]+' '+nxM.getFullYear(),'पैटर्न विश्लेषण → '+mn[nxM.getMonth()]+' '+nxM.getFullYear()+' बनाएगा')}catch(e){console.error('rSch error:',e)}}
+async function cyc(eid,dk){
+  const c=Object.keys(CO.shifts||{});if(!c.length)return;
+  const cur=_c.sh[dk]?.[eid]||'';const i=c.indexOf(cur);const nxt=c[(i+1)%c.length];
+  try{await mS('shifts/'+dk+'/'+eid,nxt);
+    const emp=gE().find(e=>e.id===eid);
+    const shLabels=CO.shifts||{};const oldLbl=shLabels[cur]?.label||cur||'None';const newLbl=shLabels[nxt]?.label||nxt;
+    const fmtDate=new Date(dk).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+    // In-app notification to employee
+    if(emp){
+      pushNotif(emp.id,
+        T('Shift Changed','शिफ्ट बदली गई'),
+        fmtDate+': '+oldLbl+' → '+newLbl,
+        '🔄','shift');
+    }
+    // WhatsApp notification to employee
+    if(emp&&emp.phone&&emp.phone.length>=10){
+      const msg=`📋 *Shift Changed*%0A👤 ${emp.name} (${emp.empId||''})%0A📅 ${fmtDate}%0A🔄 ${oldLbl} → *${newLbl}*%0A👨‍💼 Changed by: ${S.name}%0A— Man Power · mp.vkstech.com`;
+      const ph=emp.phone.replace(/\D/g,'');
+      const isAndroid=/android/i.test(navigator.userAgent);
+      if(isAndroid){const fb=encodeURIComponent('https://wa.me/91'+ph+'?text='+msg);window.open('intent://send?phone=91'+ph+'&text='+msg+'#Intent;scheme=whatsapp;package=com.whatsapp;S.browser_fallback_url='+fb+';end','_blank')}
+      else{window.open('https://wa.me/91'+ph+'?text='+msg,'_blank')}
+      toast('📱 '+T('WhatsApp opened for ','WhatsApp खुला ')+emp.name);
+    }
+  }catch(e){toast('Error')}
+}
+
+// ═══ AUTO SCHEDULER ═══
+function openAutoSch(){$('autoB').style.display='';$('autoB').scrollIntoView({behavior:'smooth'})}
+async function runAuto(){const emps=gE().filter(e=>e.status!=='left'),sk=Object.keys(CO.shifts||{});if(!emps.length||!sk.length){toast('No data');return}
+  const n=new Date(),cY=n.getFullYear(),cM=n.getMonth(),dC=new Date(cY,cM+1,0).getDate();const nD=new Date(cY,cM+1,1),nY=nD.getFullYear(),nM=nD.getMonth(),dN=new Date(nY,nM+1,0).getDate();
+  toast(T('🤖 Analyzing...','🤖 विश्लेषण...'));const ups={};
+  for(const emp of emps){const pat=[];for(let d=1;d<=dC;d++)pat.push(_c.sh[ds(new Date(cY,cM,d))]?.[emp.id]||'');
+    let bCyc=7,bSc=0;for(const tl of[7,14,21,6,5]){if(pat.length<tl*2)continue;let m=0,tot=0;for(let i=tl;i<pat.length;i++){if(pat[i]&&pat[i-tl]){tot++;if(pat[i]===pat[i-tl])m++}}const sc=tot?m/tot:0;if(sc>bSc){bSc=sc;bCyc=tl}}
+    for(let d=1;d<=dN;d++){const dk=ds(new Date(nY,nM,d)),si=(d-1)%bCyc;let sh='';for(let lb=dC;lb>=1;lb--){if((lb-1)%bCyc===si){sh=_c.sh[ds(new Date(cY,cM,lb))]?.[emp.id]||'';if(sh)break}}
+      if(!sh){const cnt={};pat.filter(Boolean).forEach(s=>{cnt[s]=(cnt[s]||0)+1});sh=Object.entries(cnt).sort((a,b)=>b[1]-a[1])[0]?.[0]||sk[0]||'D'}if(!ups[dk])ups[dk]={};ups[dk][emp.id]=sh}}
+  try{for(const[dk,es]of Object.entries(ups))await mU('shifts/'+dk,es);const mn=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];toast('✅ '+mn[nM]+' '+nY+' generated!');_wk=new Date(nY,nM,1);_wk.setDate(_wk.getDate()-_wk.getDay());rSch()}catch(e){toast('Error: '+e.message)}}
+
+// ═══ LEAVES ═══
+function sLvF(f,el){_lvF=f;el.parentNode.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));el.classList.add('on');rLvs()}
+function rLvs(){let ls=_c.lv;if(isW())ls=ls.filter(l=>l.eid===S.eid);if(_lvF!=='all')ls=ls.filter(l=>l.status===_lvF);ls.sort((a,b)=>(b.at||'').localeCompare(a.at||''));
+  const el=$('lvL');if(!ls.length){el.innerHTML=`<div class="empty"><div class="empty-i">🏖️</div><div class="empty-t">${T('No leaves','कोई छुट्टी नहीं')}</div></div>`;return}
+  const sc={pending:'var(--acc)',approved:'var(--grn)',rejected:'var(--red)'};el.innerHTML=ls.map(l=>`<div class="crd"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px"><div class="crd-n">${esc(l.name||l.eid)}</div><span style="font-size:11px;font-weight:800;color:${sc[l.status]||'var(--mt)'}">${l.status?.toUpperCase()}</span></div><div class="crd-s">${esc(l.type||'')} · ${esc(l.from)} → ${esc(l.to)} · ${esc(l.reason||'')}</div>${isM()&&l.status==='pending'?`<div style="display:flex;gap:5px;margin-top:7px"><button class="btn-a" style="flex:1;padding:7px" onclick="appLv('${l._k}')">✅ Approve</button><button class="btn-s" style="flex:1;padding:7px;color:var(--red);border-color:rgba(220,38,38,.2)" onclick="rejLv('${l._k}')">❌ Reject</button></div>`:''}</div>`).join('')}
+function openLvF(){openM(`<div class="m-handle"></div><div class="m-title">${T('New Leave','नया अवकाश')}</div><div class="fld"><label>Type</label><select id="lvTy"><option value="CL">Casual</option><option value="SL">Sick</option><option value="EL">Earned</option></select></div><div class="fld"><label>From</label><input type="date" id="lvFr"></div><div class="fld"><label>To</label><input type="date" id="lvTo"></div><div class="fld"><label>Reason</label><textarea id="lvRs"></textarea></div><button class="btn-p" onclick="subLv()">Submit</button><button class="btn-s" onclick="closeM()" style="width:100%;margin-top:7px">Cancel</button>`)}
+async function subLv(){const f=$('lvFr').value,t=$('lvTo').value;if(!f||!t){toast('Select dates');return}try{await mP('leaves',{eid:S.eid||S.phone,name:S.name,type:$('lvTy').value,from:f,to:t,reason:$('lvRs').value.trim(),status:'pending',at:new Date().toISOString()});closeM();toast('✅')}catch(e){toast('Error')}}
+async function appLv(k){try{await mU('leaves/'+k,{status:'approved',by:S.name,approvedAt:new Date().toISOString()});
+  const lv=_c.lv.find(l=>l._k===k);if(lv){const empKey=lv.eid||lv.empId||'';
+    pushNotif(empKey,T('Leave Approved ✅','छुट्टी मंजूर ✅'),lv.type+' · '+lv.from+' → '+lv.to+' — '+T('Approved by ','मंजूर: ')+S.name,'✅','leave_approved')}
+  toast('✅')}catch(e){toast('Error')}}
+async function rejLv(k){try{await mU('leaves/'+k,{status:'rejected',by:S.name,rejectedAt:new Date().toISOString()});
+  const lv=_c.lv.find(l=>l._k===k);if(lv){const empKey=lv.eid||lv.empId||'';
+    pushNotif(empKey,T('Leave Rejected ❌','छुट्टी अस्वीकार ❌'),lv.type+' · '+lv.from+' → '+lv.to+' — '+T('Rejected by ','अस्वीकार: ')+S.name,'❌','leave_rejected')}
+  toast('❌')}catch(e){toast('Error')}}
+function openResF(){openM(`<div class="m-handle"></div><div class="m-title">${T('Resignation','इस्तीफ़ा')}</div><div class="fld"><label>Reason</label><textarea id="rsRs"></textarea></div><div class="fld"><label>Last Day</label><input type="date" id="rsDt"></div><button class="btn-p" style="background:linear-gradient(135deg,var(--red),#991b1b)" onclick="subRes()">Submit</button><button class="btn-s" onclick="closeM()" style="width:100%;margin-top:7px">Cancel</button>`)}
+async function subRes(){try{await mP('leaves',{eid:S.eid||S.phone,name:S.name,type:'Resignation',from:$('rsDt').value,to:$('rsDt').value,reason:$('rsRs').value.trim(),status:'pending',at:new Date().toISOString()});closeM();toast('✅')}catch(e){toast('Error')}}
+
+// ═══ REPORTS ═══
+function sRpF(f,el){_rpF=f;el.parentNode.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));el.classList.add('on');rRps()}
+function rRps(){let ls=_c.rp;if(isW())ls=ls.filter(r=>r.eid===S.eid||r.by===S.name);if(_rpF!=='all')ls=ls.filter(r=>r.type===_rpF);ls.sort((a,b)=>(b.at||'').localeCompare(a.at||''));
+  const el=$('rpL');if(!ls.length){el.innerHTML=`<div class="empty"><div class="empty-i">📋</div><div class="empty-t">${T('No reports','कोई रिपोर्ट नहीं')}</div></div>`;return}
+  const tc={ncr:'var(--acc)',absent:'var(--red)',warning:'var(--prp)',appreciation:'var(--grn)'},ti={ncr:'⚠️',absent:'📵',warning:'⚡',appreciation:'🌟'};
+  el.innerHTML=ls.map(r=>`<div class="crd"><div style="display:flex;align-items:center;gap:6px;margin-bottom:3px"><span>${ti[r.type]||'📋'}</span><div class="crd-n" style="color:${tc[r.type]||'var(--txt)'}">${esc(r.type||'').toUpperCase()}</div><div style="margin-left:auto;font-size:9px;color:var(--mt);font-weight:600">${r.at?new Date(r.at).toLocaleDateString():''}</div></div><div class="crd-s">${esc(r.empName||'')} · ${esc(r.desc||'')}</div>${r.by?`<div style="font-size:10px;color:var(--mt);margin-top:3px;font-weight:600">By: ${esc(r.by)}</div>`:''}</div>`).join('')}
+function openRpF(){const emps=gE();openM(`<div class="m-handle"></div><div class="m-title">${T('New Report','नई रिपोर्ट')}</div><div class="fld"><label>Type</label><select id="rpTy"><option value="ncr">⚠️ NCR</option><option value="absent">📵 Absent</option><option value="warning">⚡ Warning</option><option value="appreciation">🌟 Appreciation</option></select></div>${canEditShift()?`<div class="fld"><label>Employee</label><select id="rpEm"><option value="">Select...</option>${emps.map(e=>`<option value="${e.id}">${esc(e.name)}</option>`).join('')}</select></div>`:''}<div class="fld"><label>Description</label><textarea id="rpDs"></textarea></div><button class="btn-p" onclick="subRp()">Submit</button><button class="btn-s" onclick="closeM()" style="width:100%;margin-top:7px">Cancel</button>`)}
+async function subRp(){const d=$('rpDs').value.trim();if(!d){toast('Enter description');return}const eEl=$('rpEm'),eid=eEl?eEl.value:(S.eid||''),emp=gE().find(e=>e.id===eid);try{await mP('reports',{type:$('rpTy').value,desc:d,eid,empName:emp?.name||S.name,by:S.name,at:new Date().toISOString()});closeM();toast('✅')}catch(e){toast('Error')}}
+
+// ═══ TODO ═══
+function sTdF(f,el){_tdF=f;el.parentNode.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));el.classList.add('on');rTds()}
+function rTds(){let ls=_c.td;if(isW())ls=ls.filter(t=>!t.to||t.to===S.eid);if(_tdF==='pending')ls=ls.filter(t=>!t.done);else if(_tdF==='done')ls=ls.filter(t=>t.done);
+  ls.sort((a,b)=>(a.done?1:0)-(b.done?1:0)||(b.at||'').localeCompare(a.at||''));
+  $('tdT').textContent=_c.td.length;$('tdP').textContent=_c.td.filter(t=>!t.done).length;$('tdD').textContent=_c.td.filter(t=>t.done).length;
+  const el=$('tdL');if(!ls.length){el.innerHTML=`<div class="empty"><div class="empty-i">✅</div><div class="empty-t">${T('No tasks','कोई कार्य नहीं')}</div></div>`;return}
+  const pc={high:'var(--red)',medium:'var(--acc)',low:'var(--grn)'};
+  el.innerHTML=ls.map(t=>`<div class="crd" style="display:flex;gap:10px;align-items:flex-start"><div onclick="togTd('${t._k}',${!t.done})" style="width:20px;height:20px;border-radius:5px;border:2px solid ${t.done?'var(--grn)':'var(--brd2)'};${t.done?'background:var(--grn);':''}flex-shrink:0;margin-top:2px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px">${t.done?'✓':''}</div><div style="flex:1"><div class="crd-n" style="${t.done?'text-decoration:line-through;opacity:.4':''}">${esc(t.title)}</div>${t.desc?`<div class="crd-s">${esc(t.desc)}</div>`:''}<div style="display:flex;gap:5px;margin-top:3px">${t.priority?`<span style="font-size:9px;font-weight:800;padding:2px 6px;border-radius:4px;background:${(pc[t.priority]||'var(--acc)')+'10'};color:${pc[t.priority]||'var(--acc)'}">${t.priority.toUpperCase()}</span>`:''}</div></div></div>`).join('')}
+async function togTd(k,d){try{await mU('todos/'+k,{done:d,doneAt:d?new Date().toISOString():null})}catch(e){toast('Error')}}
+function openTdF(){openM(`<div class="m-handle"></div><div class="m-title">${T('New Task','नया कार्य')}</div><div class="fld"><label>Title</label><input id="tdTi"></div><div class="fld"><label>Description</label><textarea id="tdDs"></textarea></div><div class="fld"><label>Priority</label><select id="tdPr"><option value="medium">🟡 Normal</option><option value="high">🔴 Urgent</option><option value="low">🟢 Low</option></select></div><div class="fld"><label>Due</label><input type="date" id="tdDu"></div><button class="btn-p" onclick="subTd()">Add Task</button><button class="btn-s" onclick="closeM()" style="width:100%;margin-top:7px">Cancel</button>`)}
+async function subTd(){const t=$('tdTi').value.trim();if(!t){toast('Enter title');return}try{await mP('todos',{title:t,desc:$('tdDs').value.trim(),priority:$('tdPr').value,due:$('tdDu').value,done:false,by:S.name,at:new Date().toISOString()});closeM();toast('✅')}catch(e){toast('Error')}}
+
+// ═══ PENDING ═══
+function rPend(){if(!isM())return;const lvs=_c.lv.filter(l=>l.status==='pending');
+  $('pLv').innerHTML=lvs.length?lvs.map(l=>`<div class="crd"><div class="crd-n">${esc(l.name||l.eid)}</div><div class="crd-s">${esc(l.type)} · ${esc(l.from)} → ${esc(l.to)}</div><div style="display:flex;gap:5px;margin-top:7px"><button class="btn-a" style="flex:1;padding:7px" onclick="appLv('${l._k}')">✅ Approve</button><button class="btn-s" style="flex:1;padding:7px;color:var(--red);border-color:rgba(220,38,38,.2)" onclick="rejLv('${l._k}')">❌ Reject</button></div></div>`).join(''):`<div style="color:var(--mt);font-size:12px;padding:10px;font-weight:600">${T('Nothing pending','कुछ लंबित नहीं')}</div>`}
+
+// ═══ TEAM ═══
+function rTeam(srch){const dp=CO.depts||{},emps=gE().filter(e=>e.status!=='left');let ls=_dF==='ALL'?emps:emps.filter(e=>e.dept===_dF);
+  if(srch){const q=srch.toLowerCase();ls=ls.filter(e=>(e.name||'').toLowerCase().includes(q)||(e.empId||'').toLowerCase().includes(q))}
+  if(canAddRemove())$('tmAR').style.display='';
+  $('tmDF').innerHTML=`<div class="chip${_dF==='ALL'?' on':''}" onclick="_dF='ALL';rTeam();this.parentNode.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));this.classList.add('on')">${T('All','सभी')}</div>`+Object.entries(dp).map(([k,d])=>`<div class="chip${_dF===k?' on':''}" onclick="_dF='${k}';rTeam();this.parentNode.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));this.classList.add('on')">${esc(d.name)}</div>`).join('');
+  const el=$('tmL');if(!ls.length){el.innerHTML=`<div class="empty"><div class="empty-i">👥</div><div class="empty-t">${T('No members','कोई सदस्य नहीं')}</div></div>`;return}
+  el.innerHTML=ls.map(e=>{const dept=dp[e.dept]||{};const tlBadge=e.isTeamLead?`<span style="font-size:8px;font-weight:800;padding:2px 6px;border-radius:4px;background:var(--accBg);color:var(--acc);margin-left:4px">TEAM LEAD</span>`:'';return`<div class="crd" ${canEditShift()?`onclick="openEdE('${e.id}')" style="cursor:pointer"`:''} style="display:flex;align-items:center;gap:10px"><div class="u-av" style="background:${dept.color||'var(--acc)'}">${(e.name||'?').charAt(0)}</div><div style="flex:1"><div class="crd-n">${esc(e.name)}${tlBadge}</div><div class="crd-s">${esc(e.empId)}${e.phone?' · 📱'+esc(e.phone):''}${dept.name?' · '+esc(dept.name):''}</div></div></div>`}).join('')}
+function openAddE(){const dp=CO.depts||{};openM(`<div class="m-handle"></div><div class="m-title">${T('Add Employee','कर्मचारी जोड़ें')}</div><div class="fld"><label>Name</label><input id="aeN"></div><div class="fld"><label>Employee Code</label><input id="aeC" autocapitalize="characters"></div><div class="fld"><label>Mobile (10 digit)</label><input id="aeP" type="tel" maxlength="10" oninput="this.value=this.value.replace(/\\D/g,'')"></div><div class="fld"><label>Department</label><select id="aeD">${Object.entries(dp).map(([k,d])=>`<option value="${k}">${esc(d.name)}</option>`).join('')}</select></div><div class="fld"><label>Designation</label><input id="aeDe"></div><div class="fld"><label>Salary</label><input id="aeS" type="number"></div><button class="btn-p" onclick="subAddE()">Add</button><button class="btn-s" onclick="closeM()" style="width:100%;margin-top:7px">Cancel</button>`)}
+async function subAddE(){const n=$('aeN').value.trim(),c=$('aeC').value.trim().toUpperCase(),p=$('aeP').value.trim();if(!n||!c){toast('Name & Code required');return}
+  try{const id='e_'+Date.now();await mS('employees/'+id,{id,name:n,empId:c,phone:p,dept:$('aeD').value,designation:$('aeDe').value.trim(),salary:parseInt($('aeS').value)||0,status:'active',createdAt:new Date().toISOString()});if(p.length===10)await fS('wkrIdx/'+p,{managerId:S.mid,empId:id});closeM();toast('✅')}catch(e){toast('Error')}}
+function openEdE(id){const e=gE().find(x=>x.id===id);if(!e)return;const dp=CO.depts||{};
+  if(isM()){
+    // Manager: full edit + team lead toggle
+    const tlBtn=e.isTeamLead
+      ?`<button class="btn-s" onclick="togTL('${id}',false)" style="width:100%;margin-top:7px;color:var(--acc);border-color:rgba(194,65,12,.2)">⬇️ ${T('Remove Team Lead','टीम लीड हटाएं')}</button>`
+      :`<button class="btn-s" onclick="togTL('${id}',true)" style="width:100%;margin-top:7px;color:var(--grn);border-color:rgba(21,128,61,.2)">⭐ ${T('Make Team Lead','टीम लीड बनाएं')}</button>`;
+    openM(`<div class="m-handle"></div><div class="m-title">${T('Edit Employee','कर्मचारी संपादन')}</div>${e.isTeamLead?'<div style="padding:6px 10px;background:var(--accBg);border:1px solid rgba(194,65,12,.2);border-radius:8px;margin-bottom:10px;font-size:11px;font-weight:700;color:var(--acc)">⭐ This employee is a Team Lead (can edit shifts & view team)</div>':''}<div class="fld"><label>Name</label><input id="eeN" value="${esc(e.name||'')}"></div><div class="fld"><label>Mobile</label><input id="eeP" value="${esc(e.phone||'')}" type="tel"></div><div class="fld"><label>Dept</label><select id="eeD">${Object.entries(dp).map(([k,d])=>`<option value="${k}"${e.dept===k?' selected':''}>${esc(d.name)}</option>`).join('')}</select></div><div class="fld"><label>Designation</label><input id="eeDe" value="${esc(e.designation||'')}"></div><div class="fld"><label>Salary</label><input id="eeS" value="${e.salary||0}" type="number"></div><button class="btn-p" onclick="subEdE('${id}')">Save</button>${tlBtn}<button class="btn-s" onclick="markL('${id}')" style="width:100%;margin-top:7px;color:var(--red);border-color:rgba(220,38,38,.2)">🚪 Mark as Left</button><button class="btn-s" onclick="closeM()" style="width:100%;margin-top:7px">Cancel</button>`)
+  }else{
+    // Team Lead: view only (no edit/remove)
+    const dept=dp[e.dept]||{};
+    openM(`<div class="m-handle"></div><div class="m-title">👤 ${esc(e.name)}</div><div style="padding:10px;background:var(--crd2);border-radius:10px;margin-bottom:10px"><div style="font-size:13px;color:var(--tx2);line-height:1.8;font-weight:600">📋 Code: <b>${esc(e.empId)}</b><br>📱 Mobile: <b>${esc(e.phone||'—')}</b><br>🏢 Dept: <b>${esc(dept.name||e.dept||'—')}</b><br>💼 Role: <b>${esc(e.designation||'—')}</b>${e.isTeamLead?'<br>⭐ <b style="color:var(--acc)">Team Lead</b>':''}</div></div><button class="btn-s" onclick="closeM()" style="width:100%">Close</button>`)
+  }
+}
+async function togTL(id,val){
+  try{await mU('employees/'+id,{isTeamLead:val||null});closeM();toast(val?'⭐ '+T('Team Lead assigned','टीम लीड नियुक्त'):'✅ '+T('Team Lead removed','टीम लीड हटाया'));rTeam()}catch(e){toast('Error: '+e.message)}
+}
+async function subEdE(id){try{const np=$('eeP').value.trim();await mU('employees/'+id,{name:$('eeN').value.trim(),phone:np,dept:$('eeD').value,designation:$('eeDe').value.trim(),salary:parseInt($('eeS').value)||0});if(np.length===10)await fS('wkrIdx/'+np,{managerId:S.mid,empId:id});closeM();toast('✅')}catch(e){toast('Error')}}
+async function markL(id){if(!confirm('Mark as left?'))return;try{await mU('employees/'+id,{status:'left',leftAt:new Date().toISOString()});closeM();toast('✅')}catch(e){toast('Error')}}
+
+// ═══ EXCEL UPLOAD ═══
+function openXL(){
+  const mn=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const now=new Date();
+  openM(`<div class="m-handle"></div>
+    <div class="m-title">📤 ${T('Upload Excel — Employees + Shifts','एक्सेल अपलोड — कर्मचारी + शिफ्ट')}</div>
+    <div style="background:var(--bluBg);border:1px solid rgba(37,99,235,.15);border-radius:10px;padding:12px;margin-bottom:12px">
+      <div style="font-size:12px;font-weight:800;color:var(--blu);margin-bottom:6px">📋 ${T('Excel Format Required:','एक्सेल का प्रारूप:')}</div>
+      <div style="font-size:11px;color:var(--tx2);line-height:1.7;font-weight:600">
+        <b>${T('Row 1 (Header):','पंक्ति 1 (हैडर):')}</b> Name | Designation | Dept | Employee Code | Mobile | 1 | 2 | 3 | 4 | ... | 28/29/30/31<br>
+        <b>${T('Row 2+ (Data):','पंक्ति 2+ (डेटा):')}</b> ${T('Employee info + shift codes for each date','कर्मचारी जानकारी + प्रत्येक तारीख के लिए शिफ्ट कोड')}<br>
+        <b>${T('Shift Codes:','शिफ्ट कोड:')}</b> <span style="color:var(--acc);font-weight:800">${Object.entries(CO.shifts||{}).map(([c,s])=>c+' ('+s.label+')').join(', ')}</span>
+      </div>
+    </div>
+    <div style="background:var(--accBg);border:1px solid rgba(194,65,12,.15);border-radius:10px;padding:10px;margin-bottom:12px">
+      <div style="font-size:11px;color:var(--tx2);line-height:1.6;font-weight:600">
+        💡 ${T('Month is auto-detected from sheet name or date columns. You can also select manually below.','महीना शीट नाम या तारीख कॉलम से ऑटो-डिटेक्ट होता है।')}
+      </div>
+    </div>
+    <div class="fld"><label>${T('Month (for shift dates)','महीना (शिफ्ट तारीखों के लिए)')}</label>
+      <input type="month" id="xlMo" value="${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}">
+    </div>
+    <div style="border:2px dashed var(--brd);border-radius:12px;padding:24px;text-align:center;cursor:pointer;background:var(--crd2);margin-bottom:12px" onclick="$('xlF').click()">
+      <div style="font-size:28px;margin-bottom:6px">📊</div>
+      <div style="font-size:13px;font-weight:800;color:var(--tx2)">${T('Tap to select Excel file','एक्सेल फ़ाइल चुनने के लिए टैप करें')}</div>
+      <div style="font-size:11px;color:var(--mt);margin-top:3px">.xlsx, .xls, .csv</div>
+    </div>
+    <input type="file" id="xlF" accept=".xlsx,.xls,.csv" style="display:none" onchange="previewXL(this)">
+    <div id="xlPreview" style="display:none;margin-bottom:12px"></div>
+    <button class="btn-p" onclick="doXL()" id="xlBtn" style="display:none">${T('Upload & Process','अपलोड और प्रोसेस')}</button>
+    <button class="btn-s" onclick="closeM()" style="width:100%;margin-top:7px">${T('Cancel','रद्द करें')}</button>`)
+}
+
+async function previewXL(inp){
+  const f=inp.files[0];if(!f)return;
+  // Show immediate feedback
+  const pEl=$('xlPreview');if(pEl){pEl.innerHTML='<div style="padding:12px;background:var(--bluBg);border-radius:8px;font-size:12px;color:var(--blu);font-weight:700">⏳ Reading '+esc(f.name)+' ('+Math.round(f.size/1024)+'KB)...</div>';pEl.style.display=''}
+  try{
+    const data=await f.arrayBuffer(),wb=XLSX.read(data,{cellDates:false}),ws=wb.Sheets[wb.SheetNames[0]];
+    // Read as array of arrays (raw) to handle multi-row headers
+    const allRows=XLSX.utils.sheet_to_json(ws,{header:1,defval:'',raw:true});
+    if(allRows.length<4){toast(T('File too small — need at least 4 rows','फ़ाइल बहुत छोटी'));return}
+    const shName=wb.SheetNames[0]||'';
+
+    // STEP 1: Find month from Row 1 title or sheet name
+    const mnN=['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+    let dMo=null,dYr=null;
+    // Scan first 2 rows for month name
+    for(let r=0;r<Math.min(3,allRows.length);r++){
+      const rowText=allRows[r].join(' ').toLowerCase();
+      for(let i=0;i<12;i++){if(rowText.includes(mnN[i])){dMo=i;const ym=rowText.match(/20\d{2}/);dYr=ym?parseInt(ym[0]):new Date().getFullYear();break}}
+      if(dMo!==null)break;
+    }
+    // Fallback: try sheet name
+    if(dMo===null){const sl=shName.toLowerCase();for(let i=0;i<12;i++){if(sl.includes(mnN[i])){dMo=i;const ym=shName.match(/20\d{2}/);dYr=ym?parseInt(ym[0]):new Date().getFullYear();break}}}
+    if(dMo!==null)$('xlMo').value=(dYr||new Date().getFullYear())+'-'+String(dMo+1).padStart(2,'0');
+
+    // STEP 2: Find the header row (the one with "Name" and day numbers 1-31)
+    let hdrIdx=-1;
+    for(let r=0;r<Math.min(5,allRows.length);r++){
+      const rowStr=allRows[r].map(c=>String(c).toLowerCase());
+      if(rowStr.includes('name')||rowStr.some(c=>c.includes('name'))){hdrIdx=r;break}
+    }
+    if(hdrIdx===-1){
+      // Fallback: find row that has numbers 1-31 as consecutive values
+      for(let r=0;r<Math.min(5,allRows.length);r++){
+        const nums=allRows[r].filter(c=>{const n=parseInt(c);return n>=1&&n<=31});
+        if(nums.length>=10){hdrIdx=r;break}
+      }
+    }
+    if(hdrIdx===-1){toast(T('Cannot find headers (Name, 1-31)','हेडर नहीं मिले'));return}
+
+    const hdrs=allRows[hdrIdx].map(c=>String(c||'').trim());
+    const dataRows=allRows.slice(hdrIdx+1).filter(r=>r.some(c=>c!==''&&c!==null&&c!==undefined));
+
+    // STEP 3: Identify info columns and date columns
+    const colMap={name:-1,desig:-1,code:-1,mobile:-1,woff:-1};
+    const dateCols=[]; // {colIdx, day}
+    hdrs.forEach((h,i)=>{
+      const hl=h.toLowerCase();
+      if(hl.includes('name')&&colMap.name<0)colMap.name=i;
+      else if(hl.includes('desig'))colMap.desig=i;
+      else if(hl.includes('code')||hl.includes('emp'))colMap.code=i;
+      else if(hl.includes('mobile')||hl.includes('phone'))colMap.mobile=i;
+      else if(hl.includes('w-off')||hl.includes('woff')||hl.includes('weekly'))colMap.woff=i;
+      else{const n=parseInt(h);if(n>=1&&n<=31)dateCols.push({idx:i,day:n})}
+    });
+    dateCols.sort((a,b)=>a.day-b.day);
+
+    if(colMap.name<0){toast(T('No "Name" column found','नाम कॉलम नहीं मिला'));return}
+
+    // STEP 4: Show preview
+    const prev=dataRows.slice(0,4);
+    let prevHtml=`<div style="font-size:12px;font-weight:800;color:var(--grn);margin-bottom:6px">✅ ${T('File loaded successfully!','फ़ाइल लोड हो गई!')}</div>
+      <div style="font-size:11px;color:var(--tx2);margin-bottom:6px;font-weight:600;line-height:1.6">
+        📄 <b>${esc(f.name)}</b> · Sheet: "${esc(shName)}"<br>
+        👤 <b>${dataRows.length}</b> ${T('employees found','कर्मचारी मिले')} · 📅 <b>${dateCols.length}</b> ${T('days of shifts','दिनों की शिफ्ट')}
+        ${dMo!==null?' · 🗓️ <b>'+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][dMo]+' '+(dYr||'')+'</b> detected':''}
+      </div>
+      <div style="overflow-x:auto;border:1px solid var(--brd);border-radius:8px">
+        <table style="width:100%;border-collapse:collapse;font-size:10px">
+          <thead><tr style="background:var(--crd2)">
+            <th style="padding:5px 6px;text-align:left;color:var(--mt);font-weight:700;border-bottom:1px solid var(--brd)">Name</th>
+            <th style="padding:5px 6px;text-align:left;color:var(--mt);font-weight:700;border-bottom:1px solid var(--brd)">Code</th>
+            ${dateCols.slice(0,8).map(d=>`<th style="padding:5px 4px;text-align:center;color:var(--mt);font-weight:700;border-bottom:1px solid var(--brd)">${d.day}</th>`).join('')}
+            ${dateCols.length>8?'<th style="padding:5px;color:var(--mt2)">...</th>':''}
+          </tr></thead>
+          <tbody>${prev.map(r=>`<tr>
+            <td style="padding:4px 6px;border-bottom:1px solid var(--brd);color:var(--tx2);font-weight:700">${esc(String(r[colMap.name]||''))}</td>
+            <td style="padding:4px 6px;border-bottom:1px solid var(--brd);color:var(--mt)">${esc(String(r[colMap.code>=0?colMap.code:0]||''))}</td>
+            ${dateCols.slice(0,8).map(d=>`<td style="padding:4px;text-align:center;border-bottom:1px solid var(--brd);color:var(--acc);font-weight:800">${esc(String(r[d.idx]||'—'))}</td>`).join('')}
+            ${dateCols.length>8?'<td style="padding:4px;color:var(--mt2)">...</td>':''}
+          </tr>`).join('')}</tbody>
+        </table>
+      </div>`;
+    $('xlPreview').innerHTML=prevHtml;$('xlPreview').style.display='';
+    $('xlBtn').style.display='';
+    window._xlData={dataRows,colMap,dateCols,shName};
+  }catch(e){
+    const errMsg='Error reading file: '+e.message;
+    console.error('XL error:',e);
+    toast(errMsg);
+    const pEl=$('xlPreview');if(pEl){pEl.innerHTML=`<div style="padding:12px;background:var(--redBg);border:1px solid rgba(220,38,38,.2);border-radius:8px;font-size:12px;color:var(--red);font-weight:700">❌ ${esc(errMsg)}<br><br>Debug: XLSX loaded=${typeof XLSX!=='undefined'}, File=${f?f.name:'none'}, Size=${f?f.size:0}</div>`;pEl.style.display=''}
+  }
+}
+
+async function doXL(){
+  if(!window._xlData){toast(T('Select file first','पहले फ़ाइल चुनें'));return}
+  const{dataRows,colMap,dateCols}=window._xlData;
+  const mo=$('xlMo').value;if(!mo){toast(T('Select month','महीना चुनें'));return}
+  const[yr,mn]=mo.split('-').map(Number);
+  const dim=new Date(yr,mn,0).getDate();
+  const dpKeys=Object.keys(CO.depts||{});
+  const existingEmps=gE();
+
+  const btn=$('xlBtn');btn.textContent='⏳ Processing...';btn.disabled=true;
+  let empAdded=0,empUpdated=0,shiftsSet=0;
+
+  try{
+    for(const r of dataRows){
+      const name=String(r[colMap.name]||'').trim();
+      if(!name)continue;
+      const code=colMap.code>=0?String(r[colMap.code]||'').trim().toUpperCase():'';
+      const phone=colMap.mobile>=0?String(r[colMap.mobile]||'').replace(/\D/g,''):'';
+      const desig=colMap.desig>=0?String(r[colMap.desig]||'').trim():'';
+      const woff=colMap.woff>=0?String(r[colMap.woff]||'').trim():'';
+
+      // Match dept — use first dept key if not specified
+      let deptKey=dpKeys[0]||'';
+
+      // Check if employee already exists
+      let emp=code?existingEmps.find(e=>e.empId&&e.empId.toUpperCase()===code):null;
+      let empId;
+
+      if(emp){
+        empId=emp.id;
+        const updates={};
+        if(name)updates.name=name;
+        if(desig)updates.designation=desig;
+        if(phone)updates.phone=phone;
+        if(woff)updates.woff=woff;
+        if(Object.keys(updates).length)await mU('employees/'+empId,updates);
+        empUpdated++;
+      }else{
+        empId='e_'+Date.now()+'_'+empAdded;
+        await mS('employees/'+empId,{id:empId,name,empId:code,phone,dept:deptKey,designation:desig,woff,status:'active',createdAt:new Date().toISOString()});
+        if(phone.length===10)await fS('wkrIdx/'+phone,{managerId:S.mid,empId});
+        existingEmps.push({id:empId,empId:code,name});
+        empAdded++;
+      }
+
+      // Set shifts for each date column
+      for(const dc of dateCols){
+        if(dc.day<1||dc.day>dim)continue;
+        const shVal=String(r[dc.idx]||'').trim().toUpperCase();
+        if(!shVal)continue;
+        const dateKey=ds(new Date(yr,mn-1,dc.day));
+        await mS('shifts/'+dateKey+'/'+empId,shVal);
+        shiftsSet++;
+      }
+    }
+
+    closeM();window._xlData=null;
+    toast('✅ '+empAdded+' new + '+empUpdated+' updated, '+shiftsSet+' shifts!');
+    rSch();rTeam();
+  }catch(e){toast('❌ Error: '+e.message);console.error('XL process error:',e)}
+  btn.textContent=T('Upload & Process','अपलोड और प्रोसेस');btn.disabled=false;
+}
+
+// ═══ INSTRUCTIONS ═══
+function rInst(){if(isM())$('inAR').style.display='';const ls=_c.ins,$el=$('inL');
+  if(!ls.length){$el.innerHTML=`<div class="empty"><div class="empty-i">📌</div><div class="empty-t">${T('No instructions','कोई निर्देश नहीं')}</div></div>`;return}
+  $el.innerHTML=ls.map(inst=>`<div style="margin-bottom:14px"><div style="font-size:15px;font-weight:900;color:var(--txt);margin-bottom:7px">${esc(inst.title||'')}</div>${(inst.items||[]).map(it=>`<div class="crd" style="display:flex;gap:9px"><div style="font-size:18px">${it.icon||'📌'}</div><div><div style="font-size:12px;font-weight:700;color:var(--tx2)">${esc(it.text)}</div>${it.note?`<div style="font-size:10px;color:var(--mt);margin-top:1px;font-weight:600">${esc(it.note)}</div>`:''}</div></div>`).join('')}${isM()?`<button onclick="delIn('${inst._k}')" style="font-size:10px;color:var(--red);background:none;border:none;cursor:pointer;font-weight:700">🗑️ Delete</button>`:''}</div>`).join('')}
+let _inN=0;
+function openAddIn(){_inN=0;openM(`<div class="m-handle"></div><div class="m-title">${T('Add Instructions','निर्देश जोड़ें')}</div><div class="fld"><label>Section Title</label><input id="inTi"></div><div id="inIs"></div><button onclick="addInI()" class="btn-s" style="width:100%;margin-bottom:10px">+ Add Item</button><button class="btn-p" onclick="subIn()">Save</button><button class="btn-s" onclick="closeM()" style="width:100%;margin-top:7px">Cancel</button>`);addInI()}
+function addInI(){const n=_inN++;$('inIs').innerHTML+=`<div style="background:var(--crd2);border:1px solid var(--brd);border-radius:8px;padding:8px;margin-bottom:6px"><div style="display:flex;gap:5px;margin-bottom:5px"><input class="l-inp" id="iI${n}" placeholder="📌" style="width:48px;margin:0"><input class="l-inp" id="iT${n}" placeholder="Text" style="flex:1;margin:0"></div><input class="l-inp" id="iN${n}" placeholder="Note (optional)" style="margin:0"></div>`}
+async function subIn(){const t=$('inTi').value.trim();if(!t){toast('Title');return}const items=[];for(let i=0;i<_inN;i++){const txt=$('iT'+i)?.value?.trim();if(txt)items.push({icon:$('iI'+i)?.value?.trim()||'📌',text:txt,note:$('iN'+i)?.value?.trim()||''})}if(!items.length){toast('Add items');return}try{await mP('instructions',{title:t,items});_inN=0;closeM();toast('✅')}catch(e){toast('Error')}}
+async function delIn(k){if(!confirm('Delete?'))return;try{await mR('instructions/'+k);toast('✅')}catch(e){toast('Error')}}
+
+// ═══ SUPER ADMIN ═══
+async function loadSA(){try{const mgrs=await fG('managers');const ml=mgrs?Object.entries(mgrs):[];let tw=0;const cos=new Set(),rows=[];
+  for(const[mid,md]of ml){const p=md.profile||{},emps=md.employees?Object.values(md.employees):[];tw+=emps.length;cos.add(p.company||'');rows.push({id:mid,name:p.name,phone:p.phone,company:p.company,industry:p.industry,wc:emps.length,emps,at:p.createdAt})}
+  $('saMgr').textContent=ml.length;$('saWkr').textContent=tw;$('saCo').textContent=cos.size;$('saAct').textContent=ml.length+tw;
+  $('saML').innerHTML=rows.length?rows.map(r=>`<div class="crd"><div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><div class="u-av" style="width:36px;height:36px;font-size:15px">${(r.name||'?').charAt(0)}</div><div style="flex:1"><div class="crd-n">${esc(r.name)} <span class="role-t mgr">Manager</span></div><div class="crd-s">📱 ${esc(r.phone)} · 🏢 ${esc(r.company)} · ${esc(r.industry)}</div></div><div style="text-align:right"><div style="font-family:var(--Fd);font-size:18px;font-weight:800;color:var(--blu)">${r.wc}</div><div style="font-size:8px;color:var(--mt);font-weight:700">WORKERS</div></div></div>
+    ${r.emps.length?`<div style="max-height:140px;overflow-y:auto;border-top:1px solid var(--brd);padding-top:6px;margin-top:4px">${r.emps.filter(e=>e.status!=='left').map(e=>`<div style="display:flex;align-items:center;gap:6px;padding:3px 0;font-size:11px;color:var(--tx2)"><span style="color:var(--grn);font-size:8px">●</span><b>${esc(e.name)}</b><span style="color:var(--mt)">${esc(e.empId||'')}</span>${e.phone?`<span style="color:var(--mt)">📱${esc(e.phone)}</span>`:''}<span style="color:var(--mt);margin-left:auto">${esc(e.dept||'')}</span></div>`).join('')}</div>`:'<div style="font-size:11px;color:var(--mt);padding:6px 0;font-weight:600">No workers yet</div>'}</div>`).join(''):'<div class="empty"><div class="empty-t">No managers yet</div></div>'
+}catch(e){console.error(e)}}
+
+// ═══ PROFILE ═══
+function showProfile(){openM(`<div class="m-handle"></div><div style="text-align:center;margin-bottom:14px"><div class="u-av" style="width:54px;height:54px;font-size:22px;margin:0 auto 7px;border-radius:14px">${(S.name||'?').charAt(0)}</div><div style="font-size:17px;font-weight:900;color:var(--txt)">${esc(S.name)}</div><div style="font-size:12px;color:var(--mt);font-weight:600">${esc(S.role)} · ${esc(S.phone||'')}</div><div style="font-size:11px;color:var(--mt2);font-weight:600">${esc(S.company||'Man Power')} · mp.vkstech.com</div></div>
+  ${isM()?`<div class="crd" onclick="closeM();openSettings()" style="cursor:pointer"><div class="crd-n">⚙️ ${T('Company Settings','कंपनी सेटिंग्स')}</div><div class="crd-s">${T('Departments, shifts','विभाग, शिफ्ट')}</div></div>`:''}
+  <div class="crd" onclick="doOut()" style="cursor:pointer;border-color:rgba(220,38,38,.2)"><div class="crd-n" style="color:var(--red)">🚪 ${T('Logout','लॉगआउट')}</div></div>`)}
+function doOut(){clrS();try{window._out()}catch(e){}location.reload()}
+
+function openSettings(){const dp=CO.depts||{},sh=CO.shifts||{};openM(`<div class="m-handle"></div><div class="m-title">⚙️ Settings</div>
+  <div style="font-size:12px;font-weight:800;color:var(--acc);margin-bottom:6px">Departments</div>${Object.entries(dp).map(([k,d])=>`<div style="display:flex;align-items:center;gap:5px;margin-bottom:3px"><div style="width:11px;height:11px;border-radius:3px;background:${d.color}"></div><span style="font-size:12px;font-weight:700;color:var(--tx2)">${esc(d.name)}</span></div>`).join('')}
+  <div style="display:flex;gap:5px;margin:8px 0 14px"><input class="l-inp" id="csD" placeholder="New dept" style="flex:1;margin:0"><input type="color" id="csDC" value="#ea580c" style="width:38px;height:38px;border:none;border-radius:7px;cursor:pointer"><button onclick="addCsD()" style="padding:8px 12px;border-radius:8px;border:none;background:var(--acc);color:#fff;font-weight:800;cursor:pointer">+</button></div>
+  <div style="font-size:12px;font-weight:800;color:var(--acc);margin-bottom:6px">Shift Types</div>${Object.entries(sh).map(([c,s])=>`<span class="shc" style="background:${s.color}18;color:${s.color};margin:2px">${c}</span>`).join('')}
+  <div style="display:flex;gap:4px;margin:8px 0 14px"><input class="l-inp" id="csS" placeholder="Code" style="width:48px;margin:0;text-align:center"><input class="l-inp" id="csSL" placeholder="Label" style="flex:1;margin:0"><input type="color" id="csSC" value="#f59e0b" style="width:38px;height:38px;border:none;border-radius:7px;cursor:pointer"><button onclick="addCsS()" style="padding:8px 10px;border-radius:8px;border:none;background:var(--acc);color:#fff;font-weight:800;cursor:pointer">+</button></div>
+  <button class="btn-s" onclick="closeM()" style="width:100%">Close</button>`)}
+async function addCsD(){const n=$('csD').value.trim(),c=$('csDC').value;if(!n)return;const k=n.toUpperCase().replace(/\s+/g,'_').slice(0,12);try{await mS('config/departments/'+k,{name:n,color:c});CO.depts[k]={name:n,color:c};closeM();openSettings();toast('✅')}catch(e){toast('Error')}}
+async function addCsS(){const c=$('csS').value.trim().toUpperCase(),l=$('csSL').value.trim(),co=$('csSC').value;if(!c||!l)return;try{await mS('config/shiftTypes/'+c,{label:l,color:co});CO.shifts[c]={label:l,color:co};closeM();openSettings();toast('✅')}catch(e){toast('Error')}}
+
+// ═══ PWA INSTALL ═══
+let _pwaPrompt=null;
+function initPWA(){
+  // Register Service Worker
+  if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').then(r=>{console.log('SW ok');r.addEventListener('updatefound',()=>{const nw=r.installing;if(nw)nw.addEventListener('statechange',()=>{if(nw.state==='installed'&&navigator.serviceWorker.controller){nw.postMessage('SKIP_WAITING');toast('🔄 '+T('Updating...','अपडेट हो रहा...'));setTimeout(()=>location.reload(),2000)}})});setTimeout(()=>setInterval(()=>r.update(),15*60000),60000)}).catch(e=>console.log('SW err:',e))}
+  const isInstalled=window.matchMedia('(display-mode:standalone)').matches||window.navigator.standalone===true;
+  if(!isInstalled){setTimeout(()=>{const b=$('pwaLoginBtn');if(b)b.style.display='flex'},600)}
+  window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();_pwaPrompt=e;const b=$('pwaLoginBtn');if(b)b.style.display='flex'});
+  window.addEventListener('appinstalled',()=>{toast('✅ '+T('App installed! Check Home Screen','App इंस्टॉल हो गई!'));_pwaPrompt=null;const b=$('pwaLoginBtn');if(b)b.style.display='none'});
+}
+async function doPWAInstall(){
+  if(_pwaPrompt){try{_pwaPrompt.prompt();const r=await _pwaPrompt.userChoice;if(r.outcome==='accepted')toast('✅ Installing...');_pwaPrompt=null}catch(e){_pwaPrompt=null;showPWAInstructions()}return}
+  showPWAInstructions();
+}
+function showPWAInstructions(){
+  const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isInstalled=window.matchMedia('(display-mode:standalone)').matches||window.navigator.standalone===true;
+  if(isInstalled){toast('✅ '+T('App already installed!','App पहले से installed है!'));return}
+  if(isIOS){openM(`<div class="m-handle"></div><div class="m-title">📲 ${T('Install on iPhone','iPhone पर Install करें')}</div><div style="font-size:14px;line-height:2;color:var(--tx2);font-weight:600"><div>1️⃣ ${T('Open this page in Safari','Safari browser में खोलें')}</div><div>2️⃣ ${T('Tap the <b>Share 📤</b> button at bottom','नीचे <b>Share 📤</b> button दबाएं')}</div><div>3️⃣ ${T('Select <b>"Add to Home Screen"</b>','<b>"Add to Home Screen"</b> चुनें')}</div><div>4️⃣ ${T('Tap <b>Add</b>','<b>Add</b> दबाएं')}</div></div><button class="btn-s" onclick="closeM()" style="width:100%;margin-top:14px">${T('OK','ठीक है')}</button>`)}
+  else{openM(`<div class="m-handle"></div><div class="m-title">📲 ${T('Install App','App Install करें')}</div><div style="font-size:14px;line-height:2;color:var(--tx2);font-weight:600"><div>1️⃣ ${T('Open in Chrome browser','Chrome browser में खोलें')}</div><div>2️⃣ ${T('Tap <b>⋮ (3 dots)</b> at top right','ऊपर <b>⋮ (3 dots)</b> दबाएं')}</div><div>3️⃣ ${T('Select <b>"Add to Home Screen"</b>','<b>"Add to Home Screen"</b> चुनें')}</div><div>4️⃣ ${T('Tap <b>Install</b>','<b>Install</b> दबाएं')}</div></div><button class="btn-s" onclick="closeM()" style="width:100%;margin-top:14px">${T('OK','ठीक है')}</button>`)}
+}
+initPWA();
+
+// ═══ STARTUP ═══
+document.addEventListener('fbgo',async()=>{
+  setTimeout(()=>{$('loader').style.display='none'},700);
+  if(loadS()){const fc=localStorage.getItem('fp_c');
+    if(fc&&S.role!=='superadmin'){if(S.mid){try{const cfg=await fG('managers/'+S.mid+'/config');CO={depts:cfg?.departments||{},shifts:cfg?.shiftTypes||{}}}catch(e){}}showFP();return}
+    if(S.mid){try{const cfg=await fG('managers/'+S.mid+'/config');CO={depts:cfg?.departments||{},shifts:cfg?.shiftTypes||{}}}catch(e){}}launch();return}
+  $('loginScr').classList.add('show');showStep('ls1')});
+setTimeout(()=>{const l=$('loader');if(l&&l.style.display!=='none'){l.style.display='none';$('loginScr').classList.add('show');showStep('ls1')}},6000);
+</script>
+</body>
+</html>
